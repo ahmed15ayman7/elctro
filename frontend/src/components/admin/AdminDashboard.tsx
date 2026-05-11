@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
 import AdminCharts from "@/components/admin/AdminCharts";
+import AdminOrderCard from "@/components/admin/AdminOrderCard";
 import AdminProductCard from "@/components/admin/AdminProductCard";
 import { getOrdersAction, updateOrderStatusAction, type Order } from "@/actions/orders.actions";
 import {
@@ -27,17 +28,8 @@ import {
   type Product,
   type ProductCreateInput,
 } from "@/actions/products.actions";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-
-const ORDER_STATUSES = [
-  "PENDING",
-  "CONFIRMED",
-  "PREPARING",
-  "OUT_FOR_DELIVERY",
-  "DELIVERED",
-  "CANCELLED",
-] as const;
 
 function slugify(name: string): string {
   return name
@@ -272,6 +264,17 @@ export default function AdminDashboard() {
     }
   }
 
+  const pageHeader = {
+    overview: { title: t("page_title_overview"), desc: t("page_desc_overview") },
+    categories: { title: t("page_title_categories"), desc: t("page_desc_categories") },
+    products: { title: t("page_title_products"), desc: t("page_desc_products") },
+    orders: { title: t("page_title_orders"), desc: t("page_desc_orders") },
+  }[tab];
+
+  const sortedOrders = [...orders].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 pb-12">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -280,8 +283,8 @@ export default function AdminDashboard() {
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Admin
           </div>
-          <h1 className="text-3xl font-bold tracking-tight">{t("catalog_title")}</h1>
-          <p className="mt-1 text-muted-foreground">{t("subtitle")}</p>
+          <h1 className="text-3xl font-bold tracking-tight">{pageHeader.title}</h1>
+          <p className="mt-1 max-w-2xl text-muted-foreground">{pageHeader.desc}</p>
         </div>
       </div>
 
@@ -551,34 +554,26 @@ export default function AdminDashboard() {
       )}
 
       {tab === "orders" && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-3">
-          {orders.map((order) => (
-            <Card key={order.id} className="overflow-hidden">
-              <CardContent className="flex flex-wrap items-center justify-between gap-3 p-4">
-                <div>
-                  <p className="font-medium">{order.user?.name ?? "Guest"}</p>
-                  <p className="text-xs text-muted-foreground">{order.user?.email}</p>
-                  <p className="text-xs text-muted-foreground">{formatDate(order.createdAt, locale)}</p>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex max-w-4xl flex-col gap-6"
+        >
+          {sortedOrders.length === 0 ? (
+            <Card className="border-dashed border-primary/20 bg-muted/20">
+              <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                  <ShoppingBag className="h-7 w-7" aria-hidden />
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <span className="font-semibold tabular-nums">
-                    {formatCurrency(parseFloat(order.total), locale)}
-                  </span>
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {ORDER_STATUSES.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <p className="text-lg font-semibold">{t("orders_empty_title")}</p>
+                <p className="max-w-md text-sm text-muted-foreground">{t("orders_empty_desc")}</p>
               </CardContent>
             </Card>
-          ))}
+          ) : (
+            sortedOrders.map((order) => (
+              <AdminOrderCard key={order.id} order={order} onStatusChange={handleStatusChange} />
+            ))
+          )}
         </motion.div>
       )}
     </div>
