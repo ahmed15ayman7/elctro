@@ -35,8 +35,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
-COPY --from=build --chown=nextjs:nodejs /app/src/i18n ./src/i18n
 COPY --from=build --chown=nextjs:nodejs /app/messages ./messages
+COPY --from=build --chown=nextjs:nodejs /app/src/i18n ./src/i18n
 
 
 USER nextjs
