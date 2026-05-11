@@ -1,6 +1,10 @@
 # ─── Stage 1: Install all dependencies ───────────────────────────────────────
-FROM node:20-alpine AS deps
-RUN apk add --no-cache openssl libc6-compat
+FROM node:20-bookworm-slim AS base
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates tini \
+  && rm -rf /var/lib/apt/lists/*
+
+FROM base AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
@@ -16,6 +20,7 @@ COPY prisma ./prisma
 COPY src ./src
 
 RUN npm run db:generate
+RUN npm run db:migrate
 RUN npm run build
 
 # ─── Stage 3: Production runtime ──────────────────────────────────────────────
