@@ -1,10 +1,13 @@
 # ─── Stage 1: Install dependencies ───────────────────────────────────────────
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
+FROM node:20-bookworm-slim AS base
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates tini \
+  && rm -rf /var/lib/apt/lists/*
 
-COPY package.json ./
-RUN npm install --no-package-lock --no-audit --no-fund --quiet
+FROM base AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
 # ─── Stage 2: Build Next.js app ───────────────────────────────────────────────
 FROM deps AS build
 WORKDIR /app
