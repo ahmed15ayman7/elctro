@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY package.json package-lock.json* ./
 # Install ALL deps (including dev) so we can compile TypeScript
-RUN npm ci
+RUN npm install
 
 # ─── Stage 2: Build (prisma generate + tsc) ───────────────────────────────────
 FROM deps AS build
