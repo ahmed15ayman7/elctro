@@ -54,7 +54,8 @@
     "no_results": "No items found.",
     "add_to_cart": "Add to Cart",
     "added": "Added!",
-    "price_label": "Price"
+    "price_label": "Price",
+    "item_added": "{name} added to cart"
   },
   "cart": {
     "title": "Your Cart",
@@ -79,7 +80,26 @@
     "placing": "Placing order...",
     "success_title": "Order Placed!",
     "success_message": "Your order #{id} has been placed successfully.",
-    "track_order": "Track Order"
+    "track_order": "Track Order",
+    "guest_badge": "Account required",
+    "guest_title": "Sign in to finish checkout",
+    "guest_subtitle": "We use your account to save your delivery address, confirm payment, and send order updates. Your cart stays exactly as you left it.",
+    "guest_carousel_hint": "Popular picks right now",
+    "guest_login": "Sign in",
+    "guest_register": "Create account",
+    "guest_empty_carousel": "Browse the menu to see dishes — then sign in to pay.",
+    "guest_browse_menu": "Browse menu",
+    "guest_footnote": "Secure checkout after sign-in. New here? Create a free account in under a minute.",
+    "guest_prev": "Previous dish",
+    "guest_next": "Next dish",
+    "guest_go_slide": "Go to slide {n}",
+    "empty_cart_title": "Your cart is empty",
+    "empty_cart_cta": "Browse menu",
+    "summary_title": "Order summary",
+    "summary_total": "Total",
+    "back_menu": "Back to menu",
+    "address_required": "Delivery address is required.",
+    "order_failed": "Could not place order. Please try again."
   },
   "orders": {
     "title": "My orders",

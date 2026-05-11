@@ -13,11 +13,14 @@ import { Separator } from "@/components/ui/separator";
 import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { createOrderAction } from "@/actions/orders.actions";
+import type { Product } from "@/actions/products.actions";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import CheckoutGuestGate from "@/components/checkout/CheckoutGuestGate";
 
-export default function CheckoutClient() {
+export default function CheckoutClient({ previewProducts = [] }: { previewProducts?: Product[] }) {
   const t = useTranslations("checkout");
+  const tCart = useTranslations("cart");
   const locale = useLocale();
   const { items, total, clearCart } = useCartStore();
   const { user } = useAuthStore();
@@ -48,7 +51,7 @@ export default function CheckoutClient() {
             <Button>{t("track_order")}</Button>
           </Link>
           <Link href="/menu">
-            <Button variant="outline">Back to menu</Button>
+            <Button variant="outline">{t("back_menu")}</Button>
           </Link>
         </div>
       </motion.div>
@@ -57,21 +60,21 @@ export default function CheckoutClient() {
 
   if (!user) {
     return (
-      <div className="flex flex-col items-center gap-4 py-24 text-center">
-        <p className="text-muted-foreground">Please log in to checkout.</p>
-        <Link href="/auth/login">
-          <Button>Login</Button>
-        </Link>
+      <div className="mx-auto max-w-5xl py-6 md:py-10">
+        <CheckoutGuestGate products={previewProducts} />
       </div>
     );
   }
 
   if (items.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-4 py-24 text-center">
-        <p className="text-muted-foreground">Your cart is empty.</p>
+      <div className="mx-auto flex max-w-md flex-col items-center gap-6 rounded-3xl border border-dashed bg-muted/30 px-8 py-16 text-center">
+        <p className="text-lg font-medium">{t("empty_cart_title")}</p>
+        <p className="text-sm text-muted-foreground">{tCart("empty")}</p>
         <Link href="/menu">
-          <Button>Browse Menu</Button>
+          <Button size="lg" className="rounded-full px-8">
+            {t("empty_cart_cta")}
+          </Button>
         </Link>
       </div>
     );
@@ -79,7 +82,7 @@ export default function CheckoutClient() {
 
   function handleSubmit() {
     if (!address.trim()) {
-      toast({ title: "Address required", variant: "destructive" });
+      toast({ title: t("address_required"), variant: "destructive" });
       return;
     }
 
@@ -95,14 +98,13 @@ export default function CheckoutClient() {
         clearCart();
         setOrderId(result.data.id);
       } else {
-        toast({ title: result.error ?? "Failed to place order", variant: "destructive" });
+        toast({ title: result.error ?? t("order_failed"), variant: "destructive" });
       }
     });
   }
 
   return (
     <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-5">
-      {/* Form */}
       <div className="flex flex-col gap-6 lg:col-span-3">
         <h1 className="text-2xl font-bold">{t("title")}</h1>
 
@@ -160,10 +162,9 @@ export default function CheckoutClient() {
         </Button>
       </div>
 
-      {/* Order summary */}
       <Card className="h-fit lg:col-span-2">
         <CardHeader>
-          <CardTitle className="text-lg">Order Summary</CardTitle>
+          <CardTitle className="text-lg">{t("summary_title")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {items.map((item) => {
@@ -179,7 +180,7 @@ export default function CheckoutClient() {
           })}
           <Separator />
           <div className="flex justify-between font-semibold">
-            <span>Total</span>
+            <span>{t("summary_total")}</span>
             <span>{formatCurrency(total(), locale)}</span>
           </div>
         </CardContent>

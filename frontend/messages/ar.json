@@ -54,7 +54,8 @@
     "no_results": "لا توجد عناصر.",
     "add_to_cart": "أضف إلى السلة",
     "added": "تمت الإضافة!",
-    "price_label": "السعر"
+    "price_label": "السعر",
+    "item_added": "تمت إضافة {name} إلى السلة"
   },
   "cart": {
     "title": "سلتك",
@@ -79,7 +80,26 @@
     "placing": "جاري تأكيد الطلب...",
     "success_title": "تم الطلب!",
     "success_message": "تم تقديم طلبك رقم #{id} بنجاح.",
-    "track_order": "تتبع الطلب"
+    "track_order": "تتبع الطلب",
+    "guest_badge": "يتطلب حسابًا",
+    "guest_title": "سجّل الدخول لإتمام الطلب",
+    "guest_subtitle": "نستخدم حسابك لحفظ عنوان التوصيل وتأكيد الدفع وإرسال تحديثات الطلب. سلتك تبقى كما هي.",
+    "guest_carousel_hint": "أطباق رائجة الآن",
+    "guest_login": "تسجيل الدخول",
+    "guest_register": "إنشاء حساب",
+    "guest_empty_carousel": "تصفح القائمة لرؤية الأطباق — ثم سجّل الدخول للدفع.",
+    "guest_browse_menu": "تصفح القائمة",
+    "guest_footnote": "دفع آمن بعد تسجيل الدخول. جديد؟ أنشئ حسابًا مجانيًا في أقل من دقيقة.",
+    "guest_prev": "الطبق السابق",
+    "guest_next": "الطبق التالي",
+    "guest_go_slide": "الانتقال إلى الشريحة {n}",
+    "empty_cart_title": "سلتك فارغة",
+    "empty_cart_cta": "تصفح القائمة",
+    "summary_title": "ملخص الطلب",
+    "summary_total": "الإجمالي",
+    "back_menu": "العودة للقائمة",
+    "address_required": "عنوان التوصيل مطلوب.",
+    "order_failed": "تعذر تأكيد الطلب. حاول مرة أخرى."
   },
   "orders": {
     "title": "طلباتي",
