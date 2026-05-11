@@ -6,8 +6,8 @@ import { ArrowRight, Sparkles, Truck, UtensilsCrossed, Zap, Shield, Clock } from
 import { getProductsAction, getCategoriesAction } from "@/actions/products.actions";
 import Navbar from "@/components/layout/Navbar";
 import SiteFooter from "@/components/layout/SiteFooter";
-import ProductCard from "@/components/menu/ProductCard";
 import HeroAnimations from "@/components/home/HeroAnimations";
+import HomeProductsSwiper from "@/components/home/HomeProductsSwiper";
 
 const HeroScene = dynamic(() => import("@/components/three/HeroScene"));
 
@@ -23,7 +23,7 @@ export default async function HomePage({ params }: Props) {
     getCategoriesAction(),
   ]);
 
-  const products = productsResult.data?.slice(0, 4) ?? [];
+  const carouselProducts = productsResult.data?.slice(0, 12) ?? [];
   const categories = categoriesResult.data ?? [];
 
   const featureIcons = [Zap, Shield, Clock] as const;
@@ -53,6 +53,27 @@ export default async function HomePage({ params }: Props) {
           ctaExplore={t("cta_explore")}
         />
       </section>
+
+      {/* Product showcase — Swiper autoplay (large food imagery) */}
+      {carouselProducts.length > 0 && (
+        <section className="relative z-10 border-b bg-gradient-to-b from-background via-muted/20 to-muted/40 py-14 md:py-20">
+          <div className="container mx-auto px-4">
+            <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between md:mb-10">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{t("carousel_title")}</h2>
+                <p className="mt-2 max-w-xl text-muted-foreground">{t("carousel_subtitle")}</p>
+              </div>
+              <Link href="/menu">
+                <Button variant="outline" className="gap-2 self-start rounded-full border-primary/30">
+                  {tNav("menu")}
+                  <ArrowRight className="h-4 w-4 rtl-flip" />
+                </Button>
+              </Link>
+            </div>
+            <HomeProductsSwiper products={carouselProducts} />
+          </div>
+        </section>
+      )}
 
       {/* Value props */}
       <section className="relative z-10 border-y bg-card py-16 md:py-24">
@@ -126,31 +147,6 @@ export default async function HomePage({ params }: Props) {
                 >
                   {locale === "ar" && cat.nameAr ? cat.nameAr : cat.name}
                 </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Featured */}
-      {products.length > 0 && (
-        <section className="py-16 md:py-24">
-          <div className="container mx-auto px-4">
-            <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">{t("featured_title")}</h2>
-                <p className="mt-2 max-w-xl text-muted-foreground">{t("featured_subtitle")}</p>
-              </div>
-              <Link href="/menu">
-                <Button variant="outline" className="gap-2 self-start rounded-full border-primary/30">
-                  {tNav("menu")}
-                  <ArrowRight className="h-4 w-4 rtl-flip" />
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           </div>

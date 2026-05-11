@@ -82,4 +82,12 @@
     background-size: 200% 100%;
     @apply animate-shimmer;
   }
+
+  .home-products-swiper .swiper-pagination-bullet {
+    @apply bg-muted-foreground/40 opacity-100;
+  }
+
+  .home-products-swiper .swiper-pagination-bullet-active {
+    @apply h-2.5 w-2.5 bg-primary;
+  }
 }
