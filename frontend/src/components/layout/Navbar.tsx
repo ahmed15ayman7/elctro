@@ -14,7 +14,10 @@ export default function Navbar() {
   const t = useTranslations("nav");
   const locale = useLocale();
   const router = useRouter();
-  const itemCount = useCartStore((s) => s.itemCount);
+  /** Derive count from `items` so Zustand re-renders when the cart changes (the `itemCount` fn ref is stable). */
+  const cartItemCount = useCartStore((s) =>
+    s.items.reduce((sum, i) => sum + i.quantity, 0)
+  );
   const { user, clearAuth } = useAuthStore();
 
   const otherLocale = locale === "en" ? "ar" : "en";
@@ -91,14 +94,14 @@ export default function Navbar() {
           <Link href="/cart">
             <Button variant="ghost" size="icon" className="relative">
               <ShoppingCart className="h-5 w-5" />
-              {itemCount() > 0 && (
+              {cartItemCount > 0 && (
                 <motion.span
-                  key={itemCount()}
+                  key={cartItemCount}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white"
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground"
                 >
-                  {itemCount()}
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
                 </motion.span>
               )}
             </Button>
