@@ -6,7 +6,7 @@ RUN apt-get update \
 
 FROM base AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 # ─── Stage 2: Build Next.js app ───────────────────────────────────────────────
 FROM deps AS build
