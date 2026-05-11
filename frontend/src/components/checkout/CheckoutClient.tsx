@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,9 +19,8 @@ import { toast } from "@/hooks/use-toast";
 export default function CheckoutClient() {
   const t = useTranslations("checkout");
   const locale = useLocale();
-  const router = useRouter();
   const { items, total, clearCart } = useCartStore();
-  const { user, accessToken } = useAuthStore();
+  const { user } = useAuthStore();
   const [isPending, startTransition] = useTransition();
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
@@ -56,7 +55,7 @@ export default function CheckoutClient() {
     );
   }
 
-  if (!user || !accessToken) {
+  if (!user) {
     return (
       <div className="flex flex-col items-center gap-4 py-24 text-center">
         <p className="text-muted-foreground">Please log in to checkout.</p>
@@ -85,15 +84,12 @@ export default function CheckoutClient() {
     }
 
     startTransition(async () => {
-      const result = await createOrderAction(
-        {
-          items: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
-          paymentMethod,
-          address,
-          notes: notes || undefined,
-        },
-        accessToken!
-      );
+      const result = await createOrderAction({
+        items: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
+        paymentMethod,
+        address,
+        notes: notes || undefined,
+      });
 
       if (result.success && result.data) {
         clearCart();

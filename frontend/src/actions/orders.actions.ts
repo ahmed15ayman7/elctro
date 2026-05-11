@@ -46,14 +46,12 @@ interface ActionResult<T = void> {
 }
 
 export async function createOrderAction(
-  data: CreateOrderInput,
-  accessToken: string
+  data: CreateOrderInput
 ): Promise<ActionResult<Order>> {
   try {
     const order = await apiRequest<Order>("/api/orders", {
       method: "POST",
       body: data,
-      accessToken,
     });
     return { success: true, data: order };
   } catch (err) {
@@ -64,11 +62,9 @@ export async function createOrderAction(
   }
 }
 
-export async function getOrdersAction(
-  accessToken: string
-): Promise<ActionResult<Order[]>> {
+export async function getOrdersAction(): Promise<ActionResult<Order[]>> {
   try {
-    const orders = await apiRequest<Order[]>("/api/orders", { accessToken });
+    const orders = await apiRequest<Order[]>("/api/orders");
     return { success: true, data: orders };
   } catch (err) {
     return {
@@ -78,12 +74,9 @@ export async function getOrdersAction(
   }
 }
 
-export async function getOrderAction(
-  id: string,
-  accessToken: string
-): Promise<ActionResult<Order>> {
+export async function getOrderAction(id: string): Promise<ActionResult<Order>> {
   try {
-    const order = await apiRequest<Order>(`/api/orders/${id}`, { accessToken });
+    const order = await apiRequest<Order>(`/api/orders/${id}`);
     return { success: true, data: order };
   } catch (err) {
     return {
@@ -95,14 +88,12 @@ export async function getOrderAction(
 
 export async function updateOrderStatusAction(
   id: string,
-  status: string,
-  accessToken: string
+  status: string
 ): Promise<ActionResult<Order>> {
   try {
     const order = await apiRequest<Order>(`/api/orders/${id}/status`, {
       method: "PATCH",
       body: { status },
-      accessToken,
     });
     return { success: true, data: order };
   } catch (err) {

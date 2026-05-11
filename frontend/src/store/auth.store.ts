@@ -1,8 +1,9 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-interface AuthUser {
+export interface AuthUser {
   id: string;
   email: string;
   name: string;
@@ -11,14 +12,21 @@ interface AuthUser {
 
 interface AuthState {
   user: AuthUser | null;
-  accessToken: string | null;
-  setAuth: (user: AuthUser, token: string) => void;
+  /** Access + refresh tokens live in HttpOnly Next.js cookies (see Server Actions). */
+  setAuth: (user: AuthUser) => void;
   clearAuth: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  accessToken: null,
-  setAuth: (user, accessToken) => set({ user, accessToken }),
-  clearAuth: () => set({ user: null, accessToken: null }),
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      setAuth: (user) => set({ user }),
+      clearAuth: () => set({ user: null }),
+    }),
+    {
+      name: "elctro-auth-user",
+      partialize: (state) => ({ user: state.user }),
+    }
+  )
+);

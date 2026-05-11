@@ -25,7 +25,7 @@ export default function LoginForm() {
     startTransition(async () => {
       const result = await loginAction(formData);
       if (result.success && result.data) {
-        setAuth(result.data.user, result.data.accessToken);
+        setAuth(result.data.user);
         toast({ title: "Welcome back!", description: result.data.user.name });
         router.push("/");
       } else {

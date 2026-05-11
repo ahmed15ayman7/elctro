@@ -24,23 +24,37 @@ const STATUS_VARIANTS: Record<string, "default" | "secondary" | "outline" | "suc
 export default function OrdersClient() {
   const t = useTranslations("orders");
   const locale = useLocale();
-  const { accessToken } = useAuthStore();
+  const { user } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!accessToken) return;
-    getOrdersAction(accessToken).then((res) => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+    getOrdersAction().then((res) => {
       if (res.data) setOrders(res.data);
       setLoading(false);
     });
-  }, [accessToken]);
+  }, [user]);
 
   if (loading) {
     return (
       <div className="flex justify-center py-24">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-24 text-center">
+        <p className="text-muted-foreground">Please log in to view your orders.</p>
+        <Link href="/auth/login">
+          <Button>Login</Button>
+        </Link>
       </div>
     );
   }

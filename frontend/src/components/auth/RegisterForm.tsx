@@ -25,7 +25,7 @@ export default function RegisterForm() {
     startTransition(async () => {
       const result = await registerAction(formData);
       if (result.success && result.data) {
-        setAuth(result.data.user, result.data.accessToken);
+        setAuth(result.data.user);
         toast({ title: "Account created!", description: `Welcome, ${result.data.user.name}!` });
         router.push("/");
       } else {

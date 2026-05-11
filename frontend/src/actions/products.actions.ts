@@ -82,14 +82,12 @@ export async function getCategoriesAction(): Promise<ActionResult<Category[]>> {
 }
 
 export async function createProductAction(
-  data: Omit<Product, "id" | "category"> & { price: number },
-  accessToken: string
+  data: Omit<Product, "id" | "category"> & { price: number }
 ): Promise<ActionResult<Product>> {
   try {
     const product = await apiRequest<Product>("/api/products", {
       method: "POST",
       body: data,
-      accessToken,
     });
     return { success: true, data: product };
   } catch (err) {
@@ -102,14 +100,12 @@ export async function createProductAction(
 
 export async function updateProductAction(
   id: string,
-  data: Partial<Omit<Product, "id" | "category">>,
-  accessToken: string
+  data: Partial<Omit<Product, "id" | "category">>
 ): Promise<ActionResult<Product>> {
   try {
     const product = await apiRequest<Product>(`/api/products/${id}`, {
       method: "PUT",
       body: data,
-      accessToken,
     });
     return { success: true, data: product };
   } catch (err) {
@@ -120,14 +116,10 @@ export async function updateProductAction(
   }
 }
 
-export async function deleteProductAction(
-  id: string,
-  accessToken: string
-): Promise<ActionResult> {
+export async function deleteProductAction(id: string): Promise<ActionResult> {
   try {
     await apiRequest(`/api/products/${id}`, {
       method: "DELETE",
-      accessToken,
     });
     return { success: true };
   } catch (err) {

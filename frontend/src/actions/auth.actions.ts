@@ -1,8 +1,15 @@
 "use server";
 
-import { cookies } from "next/headers";
-import { apiRequest, ApiError } from "@/lib/api";
+import {
+  clearTokenCookies,
+  getRefreshTokenFromCookies,
+  parseRefreshTokenFromResponse,
+  setTokenCookies,
+} from "@/lib/auth-cookies";
+import { ApiError } from "@/lib/api";
 import { z } from "zod";
+
+const API_BASE = process.env.API_BASE_URL ?? "http://localhost:4000";
 
 interface AuthUser {
   id: string;
@@ -15,6 +22,9 @@ interface AuthResponse {
   user: AuthUser;
   accessToken: string;
 }
+
+/** Safe payload returned to the client (tokens stay in HttpOnly cookies). */
+export type AuthClientPayload = { user: AuthUser };
 
 interface ActionResult<T = void> {
   success: boolean;
@@ -33,11 +43,39 @@ const registerSchema = z.object({
   name: z.string().min(1, "Name is required"),
 });
 
+async function postAuthJson(path: string, body: unknown): Promise<{
+  response: Response;
+  data: AuthResponse;
+}> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    cache: "no-store",
+  });
+
+  let data: AuthResponse & { error?: string };
+  try {
+    data = await response.json();
+  } catch {
+    throw new ApiError(response.status, "Invalid response from server");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      response.status,
+      typeof data.error === "string" ? data.error : "Request failed"
+    );
+  }
+
+  return { response, data };
+}
+
 // ─── Login ────────────────────────────────────────────────────────────────────
 
 export async function loginAction(
   formData: FormData
-): Promise<ActionResult<AuthResponse>> {
+): Promise<ActionResult<AuthClientPayload>> {
   const parsed = loginSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -48,14 +86,16 @@ export async function loginAction(
   }
 
   try {
-    // The backend sets the HttpOnly refresh cookie in its Set-Cookie response.
-    // We forward that cookie to the client via Next.js response cookies.
-    const result = await apiRequest<AuthResponse & { refreshToken?: string }>(
-      "/api/auth/login",
-      { method: "POST", body: parsed.data }
-    );
-
-    return { success: true, data: { user: result.user, accessToken: result.accessToken } };
+    const { response, data } = await postAuthJson("/api/auth/login", parsed.data);
+    const refresh = parseRefreshTokenFromResponse(response);
+    if (!refresh) {
+      return {
+        success: false,
+        error: "Login succeeded but refresh session could not be established",
+      };
+    }
+    await setTokenCookies(data.accessToken, refresh);
+    return { success: true, data: { user: data.user } };
   } catch (err) {
     const message = err instanceof ApiError ? err.message : "Login failed";
     return { success: false, error: message };
@@ -66,7 +106,7 @@ export async function loginAction(
 
 export async function registerAction(
   formData: FormData
-): Promise<ActionResult<AuthResponse>> {
+): Promise<ActionResult<AuthClientPayload>> {
   const parsed = registerSchema.safeParse({
     email: formData.get("email"),
     password: formData.get("password"),
@@ -78,12 +118,16 @@ export async function registerAction(
   }
 
   try {
-    const result = await apiRequest<AuthResponse>(
-      "/api/auth/register",
-      { method: "POST", body: parsed.data }
-    );
-
-    return { success: true, data: { user: result.user, accessToken: result.accessToken } };
+    const { response, data } = await postAuthJson("/api/auth/register", parsed.data);
+    const refresh = parseRefreshTokenFromResponse(response);
+    if (!refresh) {
+      return {
+        success: false,
+        error: "Account created but refresh session could not be established",
+      };
+    }
+    await setTokenCookies(data.accessToken, refresh);
+    return { success: true, data: { user: data.user } };
   } catch (err) {
     const message = err instanceof ApiError ? err.message : "Registration failed";
     return { success: false, error: message };
@@ -92,23 +136,39 @@ export async function registerAction(
 
 // ─── Refresh ──────────────────────────────────────────────────────────────────
 
-export async function refreshAction(): Promise<ActionResult<AuthResponse>> {
+export async function refreshAction(): Promise<ActionResult<AuthClientPayload>> {
   try {
-    // Refresh token arrives as an HttpOnly cookie; next/headers lets us forward it.
-    const cookieStore = await cookies();
-    const refreshCookie = cookieStore.get("refresh_token");
-
-    if (!refreshCookie) {
+    const refreshToken = await getRefreshTokenFromCookies();
+    if (!refreshToken) {
       return { success: false, error: "No session" };
     }
 
-    const result = await apiRequest<AuthResponse>("/api/auth/refresh", {
+    const response = await fetch(`${API_BASE}/api/auth/refresh`, {
       method: "POST",
-      headers: { Cookie: `refresh_token=${refreshCookie.value}` },
+      headers: { Cookie: `refresh_token=${refreshToken}` },
+      cache: "no-store",
     });
 
-    return { success: true, data: result };
+    let data: AuthResponse & { error?: string };
+    try {
+      data = await response.json();
+    } catch {
+      return { success: false, error: "Session expired" };
+    }
+
+    if (!response.ok) {
+      await clearTokenCookies();
+      return {
+        success: false,
+        error: typeof data.error === "string" ? data.error : "Session expired",
+      };
+    }
+
+    const newRefresh = parseRefreshTokenFromResponse(response) ?? refreshToken;
+    await setTokenCookies(data.accessToken, newRefresh);
+    return { success: true, data: { user: data.user } };
   } catch {
+    await clearTokenCookies();
     return { success: false, error: "Session expired" };
   }
 }
@@ -117,19 +177,18 @@ export async function refreshAction(): Promise<ActionResult<AuthResponse>> {
 
 export async function logoutAction(): Promise<ActionResult> {
   try {
-    const cookieStore = await cookies();
-    const refreshCookie = cookieStore.get("refresh_token");
-
-    if (refreshCookie) {
-      await apiRequest("/api/auth/logout", {
+    const refreshToken = await getRefreshTokenFromCookies();
+    if (refreshToken) {
+      await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
-        headers: { Cookie: `refresh_token=${refreshCookie.value}` },
-      });
+        headers: { Cookie: `refresh_token=${refreshToken}` },
+        cache: "no-store",
+      }).catch(() => undefined);
     }
-
-    cookieStore.delete("refresh_token");
+    await clearTokenCookies();
     return { success: true };
   } catch {
+    await clearTokenCookies();
     return { success: false, error: "Logout failed" };
   }
 }

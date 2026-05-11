@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Package, ShoppingBag, Users } from "lucide-react";
+import { BarChart3, Package, ShoppingBag } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,23 +26,23 @@ const ORDER_STATUSES = [
 export default function AdminDashboard() {
   const t = useTranslations("admin");
   const locale = useLocale();
-  const { user, accessToken } = useAuthStore();
+  const { user } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [tab, setTab] = useState<"overview" | "orders" | "products">("overview");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!accessToken || user?.role !== "ADMIN") return;
-    Promise.all([
-      getOrdersAction(accessToken),
-      getProductsAction(),
-    ]).then(([ordersRes, productsRes]) => {
+    if (user?.role !== "ADMIN") {
+      setLoading(false);
+      return;
+    }
+    Promise.all([getOrdersAction(), getProductsAction()]).then(([ordersRes, productsRes]) => {
       if (ordersRes.data) setOrders(ordersRes.data);
       if (productsRes.data) setProducts(productsRes.data);
       setLoading(false);
     });
-  }, [accessToken, user]);
+  }, [user]);
 
   if (!user || user.role !== "ADMIN") {
     return (
@@ -95,8 +95,7 @@ export default function AdminDashboard() {
   ];
 
   async function handleStatusChange(orderId: string, status: string) {
-    if (!accessToken) return;
-    const res = await updateOrderStatusAction(orderId, status, accessToken);
+    const res = await updateOrderStatusAction(orderId, status);
     if (res.success && res.data) {
       setOrders((prev) => prev.map((o) => (o.id === orderId ? res.data! : o)));
       toast({ title: "Status updated" });
@@ -106,8 +105,7 @@ export default function AdminDashboard() {
   }
 
   async function handleDeleteProduct(id: string) {
-    if (!accessToken) return;
-    const res = await deleteProductAction(id, accessToken);
+    const res = await deleteProductAction(id);
     if (res.success) {
       setProducts((prev) => prev.filter((p) => p.id !== id));
       toast({ title: "Product deleted" });

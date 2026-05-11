@@ -14,14 +14,14 @@ const app = express();
 const PORT = parseInt(process.env.PORT ?? "4000", 10);
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
-app.use(
-  cors({
-    origin: [process.env.FRONTEND_ORIGIN ?? "http://localhost:3000", "https://api.ahmed15ayman7.com"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+// app.use(
+//   cors({
+//     origin: [process.env.FRONTEND_ORIGIN ?? "http://localhost:3000", "https://api.ahmed15ayman7.com"],
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
 // ─── Body + Cookie parsers ────────────────────────────────────────────────────
 app.use(express.json());

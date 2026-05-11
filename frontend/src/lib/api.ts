@@ -1,16 +1,21 @@
 /**
- * Thin API client used exclusively from Server Actions (server-side only).
- * Access tokens are passed via Authorization header; refresh tokens travel
- * as HttpOnly cookies via `credentials: 'include'` (handled by Next.js).
+ * Server-only API client (used from Server Actions).
+ * When `accessToken` is omitted, attaches Bearer from HttpOnly `access_token` cookie.
  */
+
+import { getAccessTokenFromCookies } from "@/lib/auth-cookies";
 
 const API_BASE = process.env.API_BASE_URL ?? "http://localhost:4000";
 
 interface RequestOptions {
   method?: string;
   body?: unknown;
-  accessToken?: string;
+  /** Explicit Bearer; if omitted, reads from Next.js cookies when on server. */
+  accessToken?: string | null;
+  /** Extra headers (e.g. Cookie for refresh against API). */
   headers?: Record<string, string>;
+  /** If false, never sends Authorization (public routes). Default true. */
+  attachAuth?: boolean;
 }
 
 export class ApiError extends Error {
@@ -27,22 +32,32 @@ export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {}
 ): Promise<T> {
-  const { method = "GET", body, accessToken, headers = {} } = options;
+  const {
+    method = "GET",
+    body,
+    accessToken: explicitToken,
+    headers = {},
+    attachAuth = true,
+  } = options;
 
   const requestHeaders: Record<string, string> = {
     "Content-Type": "application/json",
     ...headers,
   };
 
-  if (accessToken) {
-    requestHeaders["Authorization"] = `Bearer ${accessToken}`;
+  let bearer = explicitToken;
+  if (attachAuth && (bearer === undefined || bearer === null)) {
+    bearer = await getAccessTokenFromCookies();
+  }
+
+  if (bearer) {
+    requestHeaders["Authorization"] = `Bearer ${bearer}`;
   }
 
   const response = await fetch(`${API_BASE}${path}`, {
     method,
     headers: requestHeaders,
     body: body !== undefined ? JSON.stringify(body) : undefined,
-    credentials: "include",
     cache: "no-store",
   });
 
