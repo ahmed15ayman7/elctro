@@ -1,0 +1,112 @@
+{
+  "nav": {
+    "menu": "القائمة",
+    "cart": "السلة",
+    "orders": "الطلبات",
+    "admin": "الإدارة",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "register": "إنشاء حساب"
+  },
+  "home": {
+    "hero_title": "طعام لذيذ",
+    "hero_subtitle": "توصيل سريع",
+    "hero_description": "اطلب من مجموعتنا الواسعة من الوجبات الطازجة عالية الجودة واحصل عليها مباشرة على بابك.",
+    "cta_order": "اطلب الآن",
+    "cta_explore": "تصفح القائمة",
+    "featured_title": "العناصر المميزة",
+    "categories_title": "تصفح التصنيفات"
+  },
+  "menu": {
+    "title": "قائمتنا",
+    "search_placeholder": "ابحث عن الأطباق...",
+    "all_categories": "الكل",
+    "no_results": "لا توجد عناصر.",
+    "add_to_cart": "أضف إلى السلة",
+    "added": "تمت الإضافة!"
+  },
+  "cart": {
+    "title": "سلتك",
+    "empty": "سلتك فارغة.",
+    "empty_cta": "تصفح القائمة",
+    "quantity": "الكمية",
+    "remove": "حذف",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "إتمام الطلب",
+    "item_added": "تمت إضافة {name} إلى السلة"
+  },
+  "checkout": {
+    "title": "إتمام الطلب",
+    "address": "عنوان التوصيل",
+    "address_placeholder": "أدخل عنوان التوصيل الكامل",
+    "notes": "ملاحظات الطلب (اختياري)",
+    "notes_placeholder": "أي تعليمات خاصة...",
+    "payment_method": "طريقة الدفع",
+    "cod": "الدفع عند الاستلام",
+    "online": "الدفع الإلكتروني (محاكاة)",
+    "place_order": "تأكيد الطلب",
+    "placing": "جاري تأكيد الطلب...",
+    "success_title": "تم الطلب!",
+    "success_message": "تم تقديم طلبك رقم #{id} بنجاح.",
+    "track_order": "تتبع الطلب"
+  },
+  "orders": {
+    "title": "طلباتي",
+    "no_orders": "لم تقدم أي طلبات بعد.",
+    "order_number": "طلب #{id}",
+    "status": "الحالة",
+    "total": "المجموع",
+    "placed_on": "بتاريخ",
+    "view_details": "عرض التفاصيل",
+    "statuses": {
+      "PENDING": "قيد الانتظار",
+      "CONFIRMED": "مؤكد",
+      "PREPARING": "قيد التحضير",
+      "OUT_FOR_DELIVERY": "في الطريق إليك",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "ملغي"
+    }
+  },
+  "auth": {
+    "login_title": "مرحباً بعودتك",
+    "login_subtitle": "تسجيل الدخول إلى حسابك",
+    "register_title": "إنشاء حساب",
+    "register_subtitle": "انضم إلى إلكترو اليوم",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "name": "الاسم الكامل",
+    "submit_login": "تسجيل الدخول",
+    "submit_register": "إنشاء الحساب",
+    "loading": "يرجى الانتظار...",
+    "no_account": "ليس لديك حساب؟",
+    "have_account": "هل لديك حساب بالفعل؟",
+    "sign_up": "إنشاء حساب",
+    "sign_in": "تسجيل الدخول"
+  },
+  "admin": {
+    "dashboard": "لوحة التحكم",
+    "products": "المنتجات",
+    "categories": "التصنيفات",
+    "orders": "الطلبات",
+    "users": "المستخدمون",
+    "add_product": "إضافة منتج",
+    "edit_product": "تعديل المنتج",
+    "delete_product": "حذف المنتج",
+    "total_orders": "إجمالي الطلبات",
+    "total_revenue": "إجمالي الإيرادات",
+    "total_users": "إجمالي المستخدمين",
+    "active_products": "المنتجات النشطة"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما.",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "currency": "ر.س"
+  }
+}
