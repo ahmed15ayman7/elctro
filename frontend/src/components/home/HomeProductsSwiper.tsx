@@ -4,15 +4,13 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade, Pagination } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 import { Button } from "@/components/ui/button";
 import type { Product } from "@/actions/products.actions";
-import { formatCurrency } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/effect-fade";
 
 type Props = {
   products: Product[];
@@ -24,17 +22,24 @@ export default function HomeProductsSwiper({ products }: Props) {
 
   if (products.length === 0) return null;
 
-  const loop = products.length >= 2;
+  const loop = products.length >= 6;
 
   return (
     <div className="home-products-swiper relative">
       <Swiper
-        modules={[Autoplay, Pagination, EffectFade]}
-        effect="fade"
-        fadeEffect={{ crossFade: true }}
-        speed={900}
+        modules={[Autoplay, Pagination]}
+        slidesPerView={2}
+        spaceBetween={14}
+        breakpoints={{
+          1024: {
+            slidesPerView: 4,
+            spaceBetween: 18,
+          },
+        }}
+        watchOverflow
+        speed={700}
         autoplay={{
-          delay: 4200,
+          delay: 3800,
           disableOnInteraction: false,
           pauseOnMouseEnter: true,
         }}
@@ -54,51 +59,54 @@ export default function HomeProductsSwiper({ products }: Props) {
             locale === "ar" && product.category.nameAr ? product.category.nameAr : product.category.name;
 
           return (
-            <SwiperSlide key={product.id}>
-              <div className="relative mx-auto max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xl ring-1 ring-black/5 dark:ring-white/10">
-                <div className="relative aspect-[16/10] w-full md:aspect-[21/9]">
-                  {product.imageUrl ? (
-                    <Image
-                      src={product.imageUrl}
-                      alt={name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, 80vw"
-                      priority={product.id === products[0].id}
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-primary/20 text-8xl dark:from-orange-950/50 dark:to-amber-950/20">
-                      🍔
-                    </div>
+            <SwiperSlide key={product.id} className="!h-auto">
+              <div className="flex h-full min-h-[280px] sm:min-h-[300px]">
+                <div
+                  className={cn(
+                    "flex w-full flex-col overflow-hidden rounded-2xl border border-border/60 bg-card shadow-md ring-1 ring-black/5 dark:ring-white/10",
+                    "transition-shadow duration-200 hover:shadow-lg"
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 flex flex-col gap-3 p-6 md:flex-row md:items-end md:justify-between md:p-10">
-                    <div className="max-w-xl space-y-2 text-start">
-                      <span className="inline-block rounded-full bg-primary/90 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground shadow-sm">
-                        {cat}
-                      </span>
-                      <h3 className="text-2xl font-bold tracking-tight text-foreground drop-shadow-sm md:text-4xl md:leading-tight">
-                        {name}
+                >
+                  <Link href="/menu" className="relative block aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted">
+                    {product.imageUrl ? (
+                      <Image
+                        src={product.imageUrl}
+                        alt={name}
+                        fill
+                        className="object-cover transition-transform duration-300 ease-out hover:scale-[1.04]"
+                        sizes="(max-width: 1023px) 50vw, 25vw"
+                        priority={product.id === products[0].id}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-100 via-amber-50 to-primary/20 text-5xl dark:from-orange-950/50 dark:to-amber-950/20">
+                        🍔
+                      </div>
+                    )}
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+                    <span className="absolute start-2 top-2 inline-block max-w-[85%] truncate rounded-full bg-primary/90 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground shadow-sm sm:text-xs">
+                      {cat}
+                    </span>
+                  </Link>
+
+                  <div className="flex flex-1 flex-col gap-2 p-3 sm:p-4">
+                    <div className="min-h-0 space-y-1">
+                      <h3 className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground sm:text-base">
+                        <Link href="/menu" className="hover:text-primary hover:underline">
+                          {name}
+                        </Link>
                       </h3>
                       {desc ? (
-                        <p className="line-clamp-2 text-sm text-muted-foreground md:text-base md:leading-relaxed">
-                          {desc}
-                        </p>
+                        <p className="line-clamp-2 text-xs text-muted-foreground sm:text-sm">{desc}</p>
                       ) : null}
-                      <p className="text-2xl font-bold tabular-nums text-primary md:text-3xl">
+                    </div>
+                    <div className="mt-auto flex flex-col gap-2 border-t border-border/50 pt-2 sm:flex-row sm:items-center sm:justify-between">
+                      <p className="text-base font-bold tabular-nums text-primary sm:text-lg">
                         {formatCurrency(parseFloat(product.price), locale)}
                       </p>
+                      <Button asChild size="sm" className="w-full shrink-0 rounded-full px-4 sm:w-auto">
+                        <Link href="/menu">{tHome("carousel_cta")}</Link>
+                      </Button>
                     </div>
-                    <Button
-                      asChild
-                      size="lg"
-                      className={cn(
-                        "shrink-0 rounded-full px-8 shadow-lg shadow-primary/30",
-                        "md:self-end"
-                      )}
-                    >
-                      <Link href="/menu">{tHome("carousel_cta")}</Link>
-                    </Button>
                   </div>
                 </div>
               </div>
