@@ -3,11 +3,8 @@ FROM node:20-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-
-RUN npm config set fetch-retries 5 && \
-    npm config set fetch-retry-mintimeout 20000 && \
-    npm install --quiet --no-audit --prefer-offline
+COPY package.json ./
+RUN npm install --no-package-lock --no-audit --no-fund --quiet
 # ─── Stage 2: Build Next.js app ───────────────────────────────────────────────
 FROM deps AS build
 WORKDIR /app
