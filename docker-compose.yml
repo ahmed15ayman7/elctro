@@ -1,25 +1,25 @@
 services:
 
-  # # ─── PostgreSQL ─────────────────────────────────────────────────────────────
-  # postgres:
-  #   image: postgres:16-alpine
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER:-elctro_user}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-elctro_pass}
-  #     POSTGRES_DB: ${POSTGRES_DB:-elctro_db}
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-elctro_user} -d ${POSTGRES_DB:-elctro_db}"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #     start_period: 10s
-  #   networks:
-  #     - elctro_network
+  # ─── PostgreSQL ─────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-elctro_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-elctro_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-elctro_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-elctro_user} -d ${POSTGRES_DB:-elctro_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - elctro_network
 
   # ─── Backend (Express + Prisma) ──────────────────────────────────────────────
   backend:
