@@ -44,6 +44,28 @@ router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+// ─── GET /api/products/manage (admin — all products incl. inactive) ───────────
+// Must be registered before `/:id` so "manage" is not parsed as an id.
+
+router.get(
+  "/manage",
+  authenticateAccess,
+  requireAdmin,
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const products = await prisma.product.findMany({
+        include: {
+          category: { select: { id: true, name: true, nameAr: true, slug: true } },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+      res.json(products);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // ─── GET /api/products/:id (public) ──────────────────────────────────────────
 
 router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {

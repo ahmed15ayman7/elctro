@@ -90,6 +90,127 @@ export function buildOpenApiSpec(): Record<string, unknown> {
             error: { type: "string" },
           },
         },
+        EmptyBody: {
+          type: "object",
+          additionalProperties: false,
+          description: "Optional empty JSON object; body may be omitted.",
+        },
+        ValidationError: {
+          type: "object",
+          properties: {
+            error: { type: "string" },
+            issues: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  path: { type: "string" },
+                  message: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        CategoryCreateBody: {
+          type: "object",
+          required: ["name", "slug"],
+          properties: {
+            name: { type: "string", minLength: 1, maxLength: 100, example: "Burgers" },
+            nameAr: { type: "string", maxLength: 100, example: "برجر" },
+            slug: {
+              type: "string",
+              minLength: 1,
+              maxLength: 100,
+              pattern: "^[a-z0-9-]+$",
+              example: "burgers",
+              description: "Lowercase letters, numbers, hyphens only",
+            },
+          },
+        },
+        CategoryUpdateBody: {
+          type: "object",
+          properties: {
+            name: { type: "string", minLength: 1, maxLength: 100 },
+            nameAr: { type: "string", maxLength: 100 },
+            slug: {
+              type: "string",
+              minLength: 1,
+              maxLength: 100,
+              pattern: "^[a-z0-9-]+$",
+            },
+          },
+        },
+        ProductCreateBody: {
+          type: "object",
+          required: ["name", "price", "categoryId"],
+          properties: {
+            name: { type: "string", minLength: 1, maxLength: 200, example: "Classic Burger" },
+            nameAr: { type: "string", maxLength: 200 },
+            description: { type: "string", example: "Beef patty with lettuce" },
+            descriptionAr: { type: "string" },
+            price: { type: "number", format: "double", minimum: 0.01, example: 9.99 },
+            imageUrl: { type: "string", format: "uri", example: "https://example.com/burger.jpg" },
+            isActive: { type: "boolean", default: true },
+            categoryId: { type: "string", description: "Category cuid" },
+          },
+        },
+        ProductUpdateBody: {
+          type: "object",
+          description: "All fields optional; send only fields to change.",
+          properties: {
+            name: { type: "string", minLength: 1, maxLength: 200 },
+            nameAr: { type: "string", maxLength: 200 },
+            description: { type: "string" },
+            descriptionAr: { type: "string" },
+            price: { type: "number", format: "double", minimum: 0.01 },
+            imageUrl: { type: "string", format: "uri" },
+            isActive: { type: "boolean" },
+            categoryId: { type: "string" },
+          },
+        },
+        OrderItemInput: {
+          type: "object",
+          required: ["productId", "quantity"],
+          properties: {
+            productId: { type: "string", description: "Product cuid" },
+            quantity: { type: "integer", minimum: 1, example: 2 },
+          },
+        },
+        OrderCreateBody: {
+          type: "object",
+          required: ["items", "address"],
+          properties: {
+            items: {
+              type: "array",
+              minItems: 1,
+              items: { $ref: "#/components/schemas/OrderItemInput" },
+            },
+            paymentMethod: {
+              type: "string",
+              enum: ["COD", "ONLINE_SIMULATED"],
+              default: "COD",
+            },
+            address: { type: "string", minLength: 5, maxLength: 500 },
+            notes: { type: "string", maxLength: 500 },
+          },
+        },
+        OrderStatusUpdateBody: {
+          type: "object",
+          required: ["status"],
+          properties: {
+            status: {
+              type: "string",
+              enum: [
+                "PENDING",
+                "CONFIRMED",
+                "PREPARING",
+                "OUT_FOR_DELIVERY",
+                "DELIVERED",
+                "CANCELLED",
+              ],
+            },
+          },
+        },
       },
     },
     paths: {
@@ -169,8 +290,17 @@ export function buildOpenApiSpec(): Record<string, unknown> {
         post: {
           tags: ["Auth"],
           summary: "Refresh access token",
-          description: "Rotates refresh token; requires `refresh_token` cookie.",
+          description: "Rotates refresh token; requires `refresh_token` cookie. No JSON body required.",
           security: [{ refreshCookie: [] }],
+          requestBody: {
+            required: false,
+            description: "Optional; send `{}` or leave empty.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EmptyBody" },
+              },
+            },
+          },
           responses: {
             "200": {
               description: "New access token",
@@ -187,6 +317,15 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           tags: ["Auth"],
           summary: "Logout",
           security: [{ refreshCookie: [] }],
+          requestBody: {
+            required: false,
+            description: "Optional; send `{}` or leave empty.",
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EmptyBody" },
+              },
+            },
+          },
           responses: {
             "200": {
               description: "Logged out",
@@ -299,6 +438,14 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           summary: "Promote user to admin",
           description: "Idempotent: if the user is already ADMIN, returns the current record.",
           security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EmptyBody" },
+              },
+            },
+          },
           parameters: [
             {
               name: "id",
@@ -327,6 +474,14 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           description:
             "Sets role to CUSTOMER. You cannot demote your own account (409). Idempotent if already CUSTOMER.",
           security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: false,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/EmptyBody" },
+              },
+            },
+          },
           parameters: [
             {
               name: "id",
@@ -357,7 +512,7 @@ export function buildOpenApiSpec(): Record<string, unknown> {
       "/api/products": {
         get: {
           tags: ["Products"],
-          summary: "List active products",
+          summary: "List active products (public)",
           parameters: [
             {
               name: "categoryId",
@@ -376,11 +531,38 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           tags: ["Products"],
           summary: "Create product (admin)",
           security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ProductCreateBody" },
+              },
+            },
+          },
           responses: {
             "201": { description: "Created" },
             "403": { description: "Forbidden" },
             "401": { description: "Unauthorized" },
-            "422": { description: "Validation error" },
+            "422": {
+              description: "Validation error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ValidationError" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/api/products/manage": {
+        get: {
+          tags: ["Products"],
+          summary: "List all products including inactive (admin)",
+          security: [{ bearerAuth: [] }],
+          responses: {
+            "200": { description: "OK" },
+            "403": { description: "Forbidden" },
+            "401": { description: "Unauthorized" },
           },
         },
       },
@@ -403,10 +585,26 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           parameters: [
             { name: "id", in: "path", required: true, schema: { type: "string" } },
           ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/ProductUpdateBody" },
+              },
+            },
+          },
           responses: {
             "200": { description: "OK" },
             "403": { description: "Forbidden" },
             "401": { description: "Unauthorized" },
+            "422": {
+              description: "Validation error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ValidationError" },
+                },
+              },
+            },
           },
         },
         delete: {
@@ -433,10 +631,26 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           tags: ["Categories"],
           summary: "Create category (admin)",
           security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CategoryCreateBody" },
+              },
+            },
+          },
           responses: {
             "201": { description: "Created" },
             "403": { description: "Forbidden" },
             "401": { description: "Unauthorized" },
+            "422": {
+              description: "Validation error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ValidationError" },
+                },
+              },
+            },
           },
         },
       },
@@ -459,7 +673,27 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           parameters: [
             { name: "id", in: "path", required: true, schema: { type: "string" } },
           ],
-          responses: { "200": { description: "OK" }, "403": {}, "401": {} },
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/CategoryUpdateBody" },
+              },
+            },
+          },
+          responses: {
+            "200": { description: "OK" },
+            "403": {},
+            "401": {},
+            "422": {
+              description: "Validation error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ValidationError" },
+                },
+              },
+            },
+          },
         },
         delete: {
           tags: ["Categories"],
@@ -483,10 +717,25 @@ export function buildOpenApiSpec(): Record<string, unknown> {
           tags: ["Orders"],
           summary: "Create order (checkout)",
           security: [{ bearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/OrderCreateBody" },
+              },
+            },
+          },
           responses: {
             "201": { description: "Created" },
             "401": {},
-            "422": { description: "Validation error" },
+            "422": {
+              description: "Validation error",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/ValidationError" },
+                },
+              },
+            },
           },
         },
       },
@@ -518,23 +767,7 @@ export function buildOpenApiSpec(): Record<string, unknown> {
             required: true,
             content: {
               "application/json": {
-                schema: {
-                  type: "object",
-                  required: ["status"],
-                  properties: {
-                    status: {
-                      type: "string",
-                      enum: [
-                        "PENDING",
-                        "CONFIRMED",
-                        "PREPARING",
-                        "OUT_FOR_DELIVERY",
-                        "DELIVERED",
-                        "CANCELLED",
-                      ],
-                    },
-                  },
-                },
+                schema: { $ref: "#/components/schemas/OrderStatusUpdateBody" },
               },
             },
           },
