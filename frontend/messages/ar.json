@@ -294,7 +294,12 @@
     "product_description": "الوصف",
     "delete_product_confirm": "حذف هذا المنتج نهائيًا؟",
     "delete_failed": "تعذر حذف المنتج.",
-    "deleting": "جاري الحذف…"
+    "deleting": "جاري الحذف…",
+    "save_changes": "حفظ التغييرات",
+    "cancel_edit": "إلغاء",
+    "saving": "جاري الحفظ…",
+    "product_save_success": "تم تحديث المنتج",
+    "product_save_error": "تعذر تحديث المنتج"
   },
   "footer": {
     "tagline": "اطلب وجباتك الطازجة عبر الإنترنت مع تحديثات مباشرة من الطلب حتى بابك.",

@@ -6,6 +6,13 @@ import { Check, ChevronDown, MapPin, StickyNote, User } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 import type { Order } from "@/actions/orders.actions";
 
@@ -255,19 +262,26 @@ export default function AdminOrderCard({ order, onStatusChange }: Props) {
             <label htmlFor={`order-status-${order.id}`} className="text-sm font-medium text-foreground">
               {tAdmin("order_update_status")}
             </label>
-            <select
-              id={`order-status-${order.id}`}
+            <Select
               value={order.status}
-              onChange={(e) => onStatusChange(order.id, e.target.value)}
-              onClick={(e) => e.stopPropagation()}
-              className="h-10 w-full max-w-xs rounded-lg border border-input bg-background px-3 text-sm font-medium shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
+              onValueChange={(v) => onStatusChange(order.id, v)}
             >
-              {ALL_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {tStatus(s)}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger
+                id={`order-status-${order.id}`}
+                className="h-10 w-full max-w-xs sm:w-auto"
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ALL_STATUSES.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {tStatus(s)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </>
       ) : null}

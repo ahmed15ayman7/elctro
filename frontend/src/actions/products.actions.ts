@@ -152,9 +152,21 @@ export async function createProductAction(
   }
 }
 
+/** Fields accepted by PUT /api/products/:id (JSON body). */
+export type ProductUpdateInput = {
+  name?: string;
+  nameAr?: string;
+  description?: string;
+  descriptionAr?: string;
+  price?: number;
+  imageUrl?: string;
+  isActive?: boolean;
+  categoryId?: string;
+};
+
 export async function updateProductAction(
   id: string,
-  data: Partial<Omit<Product, "id" | "category">>
+  data: ProductUpdateInput
 ): Promise<ActionResult<Product>> {
   try {
     const product = await apiRequest<Product>(`/api/products/${id}`, {

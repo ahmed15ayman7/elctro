@@ -294,7 +294,12 @@
     "product_description": "Description",
     "delete_product_confirm": "Delete this product permanently?",
     "delete_failed": "Could not delete the product.",
-    "deleting": "Deleting…"
+    "deleting": "Deleting…",
+    "save_changes": "Save changes",
+    "cancel_edit": "Cancel",
+    "saving": "Saving…",
+    "product_save_success": "Product updated",
+    "product_save_error": "Could not update product"
   },
   "footer": {
     "tagline": "Order fresh meals online with live updates from checkout to your door.",

@@ -6,6 +6,14 @@ import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatDate } from "@/lib/utils";
 import type { AdminUser } from "@/actions/users.actions";
 import { updateUserRoleAction } from "@/actions/users.actions";
@@ -105,16 +113,22 @@ export default function AdminUsersPanel({ users, onUserUpdated }: Props) {
                   </div>
                   <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
                     <Badge variant={isAdmin ? "default" : "secondary"}>{isAdmin ? t("users_role_admin") : t("users_role_customer")}</Badge>
-                    <select
+                    <Select
                       value={u.role}
                       disabled={busyId === u.id}
-                      onChange={(e) => handleRoleChange(u.id, e.target.value as "CUSTOMER" | "ADMIN")}
-                      className="h-9 rounded-lg border border-input bg-background px-2 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      aria-label={t("users_change_role")}
+                      onValueChange={(v) => handleRoleChange(u.id, v as "CUSTOMER" | "ADMIN")}
                     >
-                      <option value="CUSTOMER">{t("users_role_customer")}</option>
-                      <option value="ADMIN">{t("users_role_admin")}</option>
-                    </select>
+                      <SelectTrigger
+                        className="h-9 w-[min(100%,11rem)] min-w-[9.5rem]"
+                        aria-label={t("users_change_role")}
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="CUSTOMER">{t("users_role_customer")}</SelectItem>
+                        <SelectItem value="ADMIN">{t("users_role_admin")}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
               );

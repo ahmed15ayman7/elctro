@@ -20,6 +20,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuthStore } from "@/store/auth.store";
 import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
@@ -578,22 +585,22 @@ export default function AdminDashboard() {
                   />
                 </div>
                 <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[200px]">
-                  <label htmlFor="admin-order-status-filter" className="text-xs font-medium text-muted-foreground">
+                  <Label htmlFor="admin-order-status-filter" className="text-xs font-medium text-muted-foreground">
                     {t("orders_filter_label")}
-                  </label>
-                  <select
-                    id="admin-order-status-filter"
-                    value={orderStatusFilter}
-                    onChange={(e) => setOrderStatusFilter(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
-                  >
-                    <option value="all">{t("orders_filter_all")}</option>
-                    {ADMIN_ORDER_STATUS_FILTERS.map((s) => (
-                      <option key={s} value={s}>
-                        {tOrderStatus(s)}
-                      </option>
-                    ))}
-                  </select>
+                  </Label>
+                  <Select value={orderStatusFilter} onValueChange={setOrderStatusFilter}>
+                    <SelectTrigger id="admin-order-status-filter" className="h-10 w-full sm:w-[220px]">
+                      <SelectValue placeholder={t("orders_filter_label")} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">{t("orders_filter_all")}</SelectItem>
+                      {ADMIN_ORDER_STATUS_FILTERS.map((s) => (
+                        <SelectItem key={s} value={s}>
+                          {tOrderStatus(s)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               {filteredOrders.length === 0 ? (

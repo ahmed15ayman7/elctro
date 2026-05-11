@@ -11,8 +11,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   createProductAction,
   type Category,
@@ -120,18 +129,18 @@ export default function AdminCreateProductDialog({
           <form id="admin-create-product-form" onSubmit={submit} className="space-y-4 px-6 py-2">
             <div className="space-y-2">
               <Label htmlFor="dlg-p-cat">{t("select_category")}</Label>
-              <select
-                id="dlg-p-cat"
-                value={pCategoryId}
-                onChange={(e) => setPCategoryId(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {locale === "ar" && c.nameAr ? c.nameAr : c.name}
-                  </option>
-                ))}
-              </select>
+              <Select value={pCategoryId} onValueChange={setPCategoryId} disabled={pending}>
+                <SelectTrigger id="dlg-p-cat">
+                  <SelectValue placeholder={t("select_category")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {locale === "ar" && c.nameAr ? c.nameAr : c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="dlg-p-name">{t("product_name_en")}</Label>
@@ -143,24 +152,11 @@ export default function AdminCreateProductDialog({
             </div>
             <div className="space-y-2">
               <Label htmlFor="dlg-p-desc">{t("description_en")}</Label>
-              <textarea
-                id="dlg-p-desc"
-                value={pDesc}
-                onChange={(e) => setPDesc(e.target.value)}
-                rows={2}
-                className="flex min-h-[72px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
+              <Textarea id="dlg-p-desc" value={pDesc} onChange={(e) => setPDesc(e.target.value)} rows={2} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="dlg-p-desc-ar">{t("description_ar")}</Label>
-              <textarea
-                id="dlg-p-desc-ar"
-                value={pDescAr}
-                onChange={(e) => setPDescAr(e.target.value)}
-                rows={2}
-                dir="rtl"
-                className="flex min-h-[72px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
+              <Textarea id="dlg-p-desc-ar" value={pDescAr} onChange={(e) => setPDescAr(e.target.value)} rows={2} dir="rtl" />
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-2">
@@ -187,15 +183,12 @@ export default function AdminCreateProductDialog({
                 />
               </div>
             </div>
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={pActive}
-                onChange={(e) => setPActive(e.target.checked)}
-                className="h-4 w-4 rounded border-input"
-              />
-              {t("is_active")}
-            </label>
+            <div className="flex items-center gap-2">
+              <Checkbox id="dlg-p-active" checked={pActive} onCheckedChange={(v) => setPActive(v === true)} />
+              <Label htmlFor="dlg-p-active" className="cursor-pointer font-normal">
+                {t("is_active")}
+              </Label>
+            </div>
           </form>
         )}
         <DialogFooter>
