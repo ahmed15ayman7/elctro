@@ -9,9 +9,7 @@ import ProductCard from "@/components/menu/ProductCard";
 import { motion } from "framer-motion";
 import HeroAnimations from "@/components/home/HeroAnimations";
 
-const HeroScene = dynamic(() => import("@/components/three/HeroScene"), {
-  ssr: false,
-});
+const HeroScene = dynamic(() => import("@/components/three/HeroScene"));
 
 type Props = { params: Promise<{ locale: string }> };
 
