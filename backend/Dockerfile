@@ -1,50 +1,51 @@
-# ─── Stage 1: Install all dependencies ───────────────────────────────────────
-FROM node:20-bookworm-slim AS base
-RUN apt-get update \
-  && apt-get install -y --no-install-recommends openssl ca-certificates tini \
-  && rm -rf /var/lib/apt/lists/*
-
-FROM base AS deps
+# ─── Stage 1: Dependencies ──────────────────────────────────────────────────
+# هنستخدم alpine في كل المراحل عشان نضمن التوافق
+FROM node:20-alpine AS deps
+# تثبيت المكتبات اللازمة لـ Prisma على Alpine
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
-# Install ALL deps (including dev) so we can compile TypeScript
 RUN npm install
 
-# ─── Stage 2: Build (prisma generate + tsc) ───────────────────────────────────
+# ─── Stage 2: Build ──────────────────────────────────────────────────────────
 FROM deps AS build
 WORKDIR /app
-
 COPY tsconfig.json ./
 COPY prisma ./prisma
 COPY src ./src
 
-RUN npm run db:generate
+# توليد الـ Client والـ Build
+RUN npx prisma generate
 RUN npm run build
 
-# ─── Stage 3: Production runtime ──────────────────────────────────────────────
+# ─── Stage 3: Production Runtime ─────────────────────────────────────────────
 FROM node:20-alpine AS runtime
+# تكرار تثبيت المكتبات هنا لضمان عمل الـ Engine
+RUN apk add --no-cache openssl libc6-compat
 WORKDIR /app
 
-# Only install production dependencies in final image
+# إنشاء مستخدم غير جذر (Non-root)
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 expressjs
+
+# نسخ ملفات الـ Production فقط
 COPY package.json package-lock.json* ./
 RUN npm ci --omit=dev
 
-# Copy compiled output and generated Prisma client
+# نسخ المخرجات والملفات الضرورية
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=build /app/node_modules/@prisma/client ./node_modules/@prisma/client
 COPY prisma ./prisma
-
-# Startup script: run migrations then start the server
 COPY docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x docker-entrypoint.sh
 
-# Non-root user for security
-RUN addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 expressjs
+# حل مشكلة الـ Permissions والـ Engines
+RUN chmod +x docker-entrypoint.sh && \
+    chown -R expressjs:nodejs /app
+
+# التبديل للمستخدم لضمان الأمان
 USER expressjs
 
 EXPOSE 4000
-
 ENTRYPOINT ["./docker-entrypoint.sh"]
