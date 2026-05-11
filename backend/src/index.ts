@@ -7,6 +7,7 @@ import { errorHandler } from "./middleware/errorHandler.js";
 import { setupSwagger } from "./docs/swagger.js";
 import { initSocket } from "./socket.js";
 import authRouter from "./routes/auth.router.js";
+import notificationsRouter from "./routes/notifications.router.js";
 import productsRouter from "./routes/products.router.js";
 import categoriesRouter from "./routes/categories.router.js";
 import ordersRouter from "./routes/orders.router.js";
@@ -39,6 +40,7 @@ app.get("/health", (_req, res) => {
 setupSwagger(app);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
+app.use("/api/notifications", notificationsRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/categories", categoriesRouter);

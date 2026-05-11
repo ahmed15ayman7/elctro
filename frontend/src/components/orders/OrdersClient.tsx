@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, MapPin, Package, Receipt, UtensilsCrossed } from "lucide-react";
+import { ChevronDown, ChevronUp, ExternalLink, MapPin, Package, Phone, Receipt, UtensilsCrossed } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -232,6 +232,55 @@ export default function OrdersClient() {
                               <div className="flex gap-2 text-sm text-muted-foreground">
                                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
                                 <span>{order.address}</span>
+                              </div>
+                            </>
+                          )}
+                          {(order.phone || order.contactInfo || order.locationLink || order.latitude) && (
+                            <>
+                              <Separator />
+                              <div className="space-y-3 text-sm">
+                                {order.phone ? (
+                                  <div className="flex gap-2">
+                                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                                    <div>
+                                      <p className="text-xs font-medium text-muted-foreground">{t("phone_label")}</p>
+                                      <p className="text-foreground">{order.phone}</p>
+                                    </div>
+                                  </div>
+                                ) : null}
+                                {order.contactInfo ? (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground">{t("contact_label")}</p>
+                                    <p className="text-foreground">{order.contactInfo}</p>
+                                  </div>
+                                ) : null}
+                                {order.locationLink ? (
+                                  <div>
+                                    <p className="text-xs font-medium text-muted-foreground">{t("location_link_label")}</p>
+                                    <a
+                                      href={order.locationLink}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                                    >
+                                      {order.locationLink}
+                                      <ExternalLink className="h-3 w-3" aria-hidden />
+                                    </a>
+                                  </div>
+                                ) : null}
+                                {order.latitude && order.longitude ? (
+                                  <div>
+                                    <a
+                                      href={`https://www.openstreetmap.org/?mlat=${order.latitude}&mlon=${order.longitude}&zoom=16`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1 font-medium text-primary hover:underline"
+                                    >
+                                      {t("map_open")}
+                                      <ExternalLink className="h-3 w-3" aria-hidden />
+                                    </a>
+                                  </div>
+                                ) : null}
                               </div>
                             </>
                           )}

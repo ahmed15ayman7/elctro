@@ -2,7 +2,7 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { ShoppingCart, User, Globe, LogOut, LayoutDashboard } from "lucide-react";
+import { ShoppingCart, User, Globe, LogOut, LayoutDashboard, Settings } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useCartStore } from "@/store/cart.store";
@@ -116,6 +116,11 @@ export default function Navbar() {
           {/* Auth */}
           {user ? (
             <div className="flex items-center gap-1">
+              <Link href="/account/settings">
+                <Button variant="ghost" size="icon" aria-label={t("account_settings")}>
+                  <Settings className="h-5 w-5" />
+                </Button>
+              </Link>
               {user.role === "ADMIN" && (
                 <Link href="/admin">
                   <Button variant="ghost" size="icon">

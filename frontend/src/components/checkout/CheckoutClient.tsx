@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
@@ -19,6 +20,15 @@ import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import CheckoutGuestGate from "@/components/checkout/CheckoutGuestGate";
 
+const CheckoutMapPickerDynamic = dynamic(() => import("@/components/checkout/CheckoutMapPicker"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[220px] items-center justify-center rounded-lg border border-dashed text-sm text-muted-foreground">
+      Loading map…
+    </div>
+  ),
+});
+
 export default function CheckoutClient({ previewProducts = [] }: { previewProducts?: Product[] }) {
   const t = useTranslations("checkout");
   const tCart = useTranslations("cart");
@@ -28,8 +38,18 @@ export default function CheckoutClient({ previewProducts = [] }: { previewProduc
   const [isPending, startTransition] = useTransition();
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [phone, setPhone] = useState("");
+  const [contactInfo, setContactInfo] = useState("");
+  const [locationLink, setLocationLink] = useState("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE_SIMULATED">("COD");
   const [orderId, setOrderId] = useState<string | null>(null);
+
+  const clearMapCoords = useCallback(() => {
+    setLatitude(null);
+    setLongitude(null);
+  }, []);
 
   if (orderId) {
     return (
@@ -86,6 +106,31 @@ export default function CheckoutClient({ previewProducts = [] }: { previewProduc
       toast({ title: t("address_required"), variant: "destructive" });
       return;
     }
+    if (!phone.trim() || phone.trim().length < 5) {
+      toast({ title: t("phone_invalid"), variant: "destructive" });
+      return;
+    }
+
+    const trimmedLink = locationLink.trim();
+    let latOut: number | undefined;
+    let lngOut: number | undefined;
+    let linkOut: string | undefined;
+
+    if (trimmedLink) {
+      try {
+        new URL(trimmedLink);
+      } catch {
+        toast({ title: t("invalid_location_url"), variant: "destructive" });
+        return;
+      }
+      linkOut = trimmedLink;
+    } else if (latitude != null && longitude != null) {
+      latOut = latitude;
+      lngOut = longitude;
+    } else {
+      toast({ title: t("location_required"), variant: "destructive" });
+      return;
+    }
 
     startTransition(async () => {
       const result = await createOrderAction({
@@ -93,6 +138,11 @@ export default function CheckoutClient({ previewProducts = [] }: { previewProduc
         paymentMethod,
         address,
         notes: notes || undefined,
+        phone: phone.trim(),
+        contactInfo: contactInfo.trim() || undefined,
+        latitude: latOut,
+        longitude: lngOut,
+        locationLink: linkOut,
       });
 
       if (result.success && result.data) {
@@ -103,6 +153,8 @@ export default function CheckoutClient({ previewProducts = [] }: { previewProduc
       }
     });
   }
+
+  const hasLink = Boolean(locationLink.trim());
 
   return (
     <div className="mx-auto grid max-w-4xl gap-8 lg:grid-cols-5">
@@ -118,6 +170,58 @@ export default function CheckoutClient({ previewProducts = [] }: { previewProduc
             onChange={(e) => setAddress(e.target.value)}
           />
         </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="phone">{t("phone")}</Label>
+          <Input
+            id="phone"
+            type="tel"
+            inputMode="tel"
+            autoComplete="tel"
+            placeholder={t("phone_placeholder")}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="contact">{t("contact_info")}</Label>
+          <Textarea
+            id="contact"
+            placeholder={t("contact_placeholder")}
+            value={contactInfo}
+            onChange={(e) => setContactInfo(e.target.value)}
+            rows={2}
+          />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="loc-link">{t("location_link")}</Label>
+          <Input
+            id="loc-link"
+            type="url"
+            placeholder={t("location_link_placeholder")}
+            value={locationLink}
+            onChange={(e) => {
+              setLocationLink(e.target.value);
+              if (e.target.value.trim()) clearMapCoords();
+            }}
+          />
+          <p className="text-xs text-muted-foreground">{t("location_link_hint")}</p>
+        </div>
+
+        {!hasLink ? (
+          <CheckoutMapPickerDynamic
+            onPositionChange={(lat, lng) => {
+              setLatitude(lat);
+              setLongitude(lng);
+              setLocationLink("");
+            }}
+            onClear={clearMapCoords}
+            hasLink={hasLink}
+            labelHint={t("map_hint")}
+          />
+        ) : null}
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="notes">{t("notes")}</Label>

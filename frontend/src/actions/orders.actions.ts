@@ -22,6 +22,11 @@ export interface Order {
   total: string;
   address: string | null;
   notes: string | null;
+  phone: string | null;
+  contactInfo: string | null;
+  latitude: string | null;
+  longitude: string | null;
+  locationLink: string | null;
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
@@ -37,6 +42,11 @@ interface CreateOrderInput {
   paymentMethod: "COD" | "ONLINE_SIMULATED";
   address: string;
   notes?: string;
+  phone: string;
+  contactInfo?: string;
+  latitude?: number;
+  longitude?: number;
+  locationLink?: string;
 }
 
 interface ActionResult<T = void> {

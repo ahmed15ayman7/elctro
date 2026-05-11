@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -49,6 +50,7 @@ import {
 import { getAdminUsersAction, type AdminUser } from "@/actions/users.actions";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+import type { AdminTab } from "@/components/admin/AdminLayoutContext";
 
 const ADMIN_ORDER_STATUS_FILTERS = [
   "PENDING",
@@ -72,6 +74,7 @@ export default function AdminDashboard() {
   const t = useTranslations("admin");
   const tOrderStatus = useTranslations("orders.statuses");
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const { user } = useAuthStore();
   const { subscribeOrderUpdated } = useOrderRealtime();
   const { tab, setTab } = useAdminLayout();
@@ -120,6 +123,14 @@ export default function AdminDashboard() {
   }, [user]);
 
   useEffect(() => {
+    const raw = searchParams.get("tab");
+    const allowed: AdminTab[] = ["overview", "categories", "products", "orders", "users"];
+    if (raw && allowed.includes(raw as AdminTab)) {
+      setTab(raw as AdminTab);
+    }
+  }, [searchParams, setTab]);
+
+  useEffect(() => {
     if (user?.role !== "ADMIN") return;
     return subscribeOrderUpdated(({ order }) => {
       setOrders((prev) => {
@@ -155,8 +166,9 @@ export default function AdminDashboard() {
         const idHit = o.id.toLowerCase().includes(q) || o.id.slice(-8).toLowerCase().includes(q);
         const nameHit = o.user?.name?.toLowerCase().includes(q);
         const emailHit = o.user?.email?.toLowerCase().includes(q);
+        const phoneHit = o.phone?.toLowerCase().includes(q);
         const itemHit = o.items.some((i) => i.product.name.toLowerCase().includes(q));
-        return Boolean(idHit || nameHit || emailHit || itemHit);
+        return Boolean(idHit || nameHit || emailHit || phoneHit || itemHit);
       });
     }
     if (orderStatusFilter !== "all") {

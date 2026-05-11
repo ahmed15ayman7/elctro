@@ -8,6 +8,7 @@ import {
 } from "../middleware/authenticate.js";
 import { ForbiddenError, NotFoundError } from "../lib/errors.js";
 import { emitOrderUpdated } from "../socket.js";
+import { notifyOrderCreatedForAdmins, notifyOrderStatusToCustomer } from "../lib/orderPush.js";
 
 const router = Router();
 
@@ -21,12 +22,30 @@ const orderItemSchema = z.object({
   quantity: z.number().int().positive(),
 });
 
-const createOrderSchema = z.object({
-  items: z.array(orderItemSchema).min(1),
-  paymentMethod: z.enum(["COD", "ONLINE_SIMULATED"]).default("COD"),
-  address: z.string().min(5).max(500),
-  notes: z.string().max(500).optional(),
-});
+const createOrderSchema = z
+  .object({
+    items: z.array(orderItemSchema).min(1),
+    paymentMethod: z.enum(["COD", "ONLINE_SIMULATED"]).default("COD"),
+    address: z.string().min(5).max(500),
+    notes: z.string().max(500).optional(),
+    phone: z.string().min(5).max(40),
+    contactInfo: z.string().max(500).optional(),
+    latitude: z.number().min(-90).max(90).optional(),
+    longitude: z.number().min(-180).max(180).optional(),
+    locationLink: z.string().url().max(2000).optional(),
+  })
+  .refine(
+    (d) =>
+      (d.latitude !== undefined && d.longitude !== undefined) ||
+      (d.locationLink !== undefined && d.locationLink.length > 0),
+    { message: "Either map coordinates or a location link is required", path: ["locationLink"] }
+  )
+  .refine(
+    (d) =>
+      (d.latitude === undefined && d.longitude === undefined) ||
+      (d.latitude !== undefined && d.longitude !== undefined),
+    { message: "Latitude and longitude must both be set", path: ["latitude"] }
+  );
 
 const updateStatusSchema = z.object({
   status: z.enum([
@@ -47,7 +66,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = (req as AuthenticatedRequest).user.id;
-      const { items, paymentMethod, address, notes } =
+      const { items, paymentMethod, address, notes, phone, contactInfo, latitude, longitude, locationLink } =
         createOrderSchema.parse(req.body);
 
       // Fetch all products in one query
@@ -81,6 +100,11 @@ router.post(
           paymentMethod,
           address,
           notes,
+          phone,
+          contactInfo: contactInfo ?? undefined,
+          latitude: latitude !== undefined ? latitude : undefined,
+          longitude: longitude !== undefined ? longitude : undefined,
+          locationLink: locationLink ?? undefined,
           total,
           items: { create: orderItems },
         },
@@ -88,6 +112,7 @@ router.post(
       });
 
       emitOrderUpdated(order as unknown as Record<string, unknown>);
+      void notifyOrderCreatedForAdmins(order);
       res.status(201).json(order);
     } catch (err) {
       next(err);
@@ -162,6 +187,7 @@ router.patch(
       });
       if (!order) throw new NotFoundError("Order not found");
       emitOrderUpdated(order as unknown as Record<string, unknown>);
+      void notifyOrderStatusToCustomer(order);
       res.json(order);
     } catch (err) {
       next(err);

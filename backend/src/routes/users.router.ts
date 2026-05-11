@@ -38,6 +38,27 @@ router.get(
   }
 );
 
+// ─── PATCH /api/users/me (authenticated) ─────────────────────────────────────
+
+router.patch(
+  "/me",
+  authenticateAccess,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = (req as AuthenticatedRequest).user.id;
+      const { name } = z.object({ name: z.string().min(1).max(120) }).parse(req.body);
+      const user = await prisma.user.update({
+        where: { id: userId },
+        data: { name },
+        select: userPublicSelect,
+      });
+      res.json(user);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
 // ─── GET /api/users (admin only) ─────────────────────────────────────────────
 
 router.get(

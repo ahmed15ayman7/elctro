@@ -29,6 +29,29 @@ export async function getAdminUsersAction(): Promise<ActionResult<AdminUser[]>> 
   }
 }
 
+export interface CurrentUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  createdAt: string;
+}
+
+export async function updateProfileAction(name: string): Promise<ActionResult<CurrentUser>> {
+  try {
+    const user = await apiRequest<CurrentUser>("/api/users/me", {
+      method: "PATCH",
+      body: { name },
+    });
+    return { success: true, data: user };
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof ApiError ? err.message : "Failed to update profile",
+    };
+  }
+}
+
 export async function updateUserRoleAction(
   userId: string,
   role: "CUSTOMER" | "ADMIN"

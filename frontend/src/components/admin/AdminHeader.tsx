@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe, LogOut, Store } from "lucide-react";
+import { Globe, LogOut, Settings, Store } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,12 @@ export default function AdminHeader() {
         <span className="hidden sm:inline">{tAdmin("storefront")}</span>
       </Link>
       <div className="flex items-center gap-1">
+        <Button variant="ghost" size="sm" asChild className="gap-1.5">
+          <Link href="/account/settings">
+            <Settings className="h-4 w-4" aria-hidden />
+            <span className="hidden sm:inline">{tNav("account_settings")}</span>
+          </Link>
+        </Button>
         <Button
           variant="ghost"
           size="sm"

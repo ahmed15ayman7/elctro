@@ -42,8 +42,9 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  refreshTokens RefreshToken[]
-  orders        Order[]
+  refreshTokens     RefreshToken[]
+  orders            Order[]
+  pushSubscriptions PushSubscription[]
 
   @@map("users")
 }
@@ -101,6 +102,13 @@ model Order {
   total         Decimal       @db.Decimal(10, 2)
   notes         String?
   address       String?
+  /// Delivery phone (required on new orders via API)
+  phone         String?
+  /// Extra contact line (WhatsApp, alternate name, etc.)
+  contactInfo   String?
+  latitude      Decimal?      @db.Decimal(10, 7)
+  longitude     Decimal?      @db.Decimal(10, 7)
+  locationLink  String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -110,6 +118,21 @@ model Order {
   @@index([userId])
   @@index([status])
   @@map("orders")
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_subscriptions")
 }
 
 model OrderItem {

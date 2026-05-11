@@ -111,7 +111,7 @@ export default function AdminUsersPanel({ users, onUserUpdated }: Props) {
                       </p>
                     </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 sm:shrink-0">
+                  <div className="flex flex-nowrap items-center gap-2 sm:shrink-0">
                     <Badge variant={isAdmin ? "default" : "secondary"}>{isAdmin ? t("users_role_admin") : t("users_role_customer")}</Badge>
                     <Select
                       value={u.role}

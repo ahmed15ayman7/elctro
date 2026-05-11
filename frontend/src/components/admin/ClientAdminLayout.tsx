@@ -52,7 +52,7 @@ export default function ClientAdminLayout({ children }: { children: ReactNode })
     <AdminLayoutProvider>
       <div className="flex min-h-screen flex-col bg-muted/20 md:flex-row">
         <AdminSidebar />
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col bg-background md:bg-muted/10">
           <AdminHeader />
           <div className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">{children}</div>
         </div>

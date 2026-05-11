@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { Fragment, useState } from "react";
-import { Check, ChevronDown, MapPin, StickyNote, User } from "lucide-react";
+import { Check, ChevronDown, ExternalLink, MapPin, Phone, StickyNote, User } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -48,6 +48,10 @@ export default function AdminOrderCard({ order, onStatusChange }: Props) {
 
   const shortId = order.id.slice(-8).toUpperCase();
   const isCancelled = order.status === "CANCELLED";
+  const mapPinUrl =
+    order.latitude && order.longitude
+      ? `https://www.openstreetmap.org/?mlat=${order.latitude}&mlon=${order.longitude}&zoom=16`
+      : null;
   const rawIdx = FULFILLMENT.indexOf(order.status as FulfillmentStatus);
   const currentIdx = isCancelled ? -1 : Math.max(0, rawIdx);
 
@@ -228,7 +232,12 @@ export default function AdminOrderCard({ order, onStatusChange }: Props) {
             )}
           </div>
 
-          {(order.address || order.notes) && (
+          {(order.address ||
+            order.notes ||
+            order.phone ||
+            order.contactInfo ||
+            order.locationLink ||
+            mapPinUrl) && (
             <>
               <Separator />
               <div className="space-y-4 p-5">
@@ -240,6 +249,65 @@ export default function AdminOrderCard({ order, onStatusChange }: Props) {
                         {tAdmin("order_address")}
                       </p>
                       <p className="mt-1 text-sm leading-relaxed text-foreground">{order.address}</p>
+                    </div>
+                  </div>
+                ) : null}
+                {order.phone ? (
+                  <div className="flex gap-3 rounded-xl border border-border/50 bg-background/80 p-4">
+                    <Phone className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {tAdmin("order_phone")}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-foreground">{order.phone}</p>
+                    </div>
+                  </div>
+                ) : null}
+                {order.contactInfo ? (
+                  <div className="flex gap-3 rounded-xl border border-border/50 bg-muted/15 p-4">
+                    <StickyNote className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" aria-hidden />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {tAdmin("order_contact")}
+                      </p>
+                      <p className="mt-1 text-sm leading-relaxed text-foreground">{order.contactInfo}</p>
+                    </div>
+                  </div>
+                ) : null}
+                {order.locationLink ? (
+                  <div className="flex gap-3 rounded-xl border border-border/50 bg-background/80 p-4">
+                    <ExternalLink className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {tAdmin("order_location_link")}
+                      </p>
+                      <a
+                        href={order.locationLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 block truncate text-sm font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {order.locationLink}
+                      </a>
+                    </div>
+                  </div>
+                ) : null}
+                {mapPinUrl ? (
+                  <div className="flex gap-3 rounded-xl border border-border/50 bg-background/80 p-4">
+                    <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-primary" aria-hidden />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {tAdmin("order_open_map")}
+                      </p>
+                      <a
+                        href={mapPinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-1 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline"
+                      >
+                        {tAdmin("order_open_map")}
+                        <ExternalLink className="h-3 w-3" aria-hidden />
+                      </a>
                     </div>
                   </div>
                 ) : null}
