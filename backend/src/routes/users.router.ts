@@ -153,9 +153,9 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const admin = (req as AuthenticatedRequest).user;
-      if (req.params.id === admin.id) {
-        throw new ConflictError("You cannot demote yourself");
-      }
+      // if (req.params.id === admin.id) {
+      //   throw new ConflictError("You cannot demote yourself");
+      // }
 
       const existing = await prisma.user.findUnique({
         where: { id: req.params.id },
