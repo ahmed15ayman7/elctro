@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Package, ShoppingBag, Sparkles, Trash2 } from "lucide-react";
+import { BarChart3, Package, Plus, Search, ShoppingBag, Sparkles, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,22 +14,32 @@ import { useAuthStore } from "@/store/auth.store";
 import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
 import AdminCharts from "@/components/admin/AdminCharts";
+import AdminCreateProductDialog from "@/components/admin/AdminCreateProductDialog";
 import AdminOrderCard from "@/components/admin/AdminOrderCard";
 import AdminProductCard from "@/components/admin/AdminProductCard";
+import AdminUsersPanel from "@/components/admin/AdminUsersPanel";
 import { getOrdersAction, updateOrderStatusAction, type Order } from "@/actions/orders.actions";
 import {
   getAdminProductsAction,
   getCategoriesAction,
   createCategoryAction,
-  createProductAction,
   deleteCategoryAction,
   deleteProductAction,
   type Category,
   type Product,
-  type ProductCreateInput,
 } from "@/actions/products.actions";
+import { getAdminUsersAction, type AdminUser } from "@/actions/users.actions";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
+
+const ADMIN_ORDER_STATUS_FILTERS = [
+  "PENDING",
+  "CONFIRMED",
+  "PREPARING",
+  "OUT_FOR_DELIVERY",
+  "DELIVERED",
+  "CANCELLED",
+] as const;
 
 function slugify(name: string): string {
   return name
@@ -42,6 +52,7 @@ function slugify(name: string): string {
 
 export default function AdminDashboard() {
   const t = useTranslations("admin");
+  const tOrderStatus = useTranslations("orders.statuses");
   const locale = useLocale();
   const { user } = useAuthStore();
   const { subscribeOrderUpdated } = useOrderRealtime();
@@ -56,14 +67,11 @@ export default function AdminDashboard() {
   const [catNameAr, setCatNameAr] = useState("");
   const [catSlug, setCatSlug] = useState("");
 
-  const [pName, setPName] = useState("");
-  const [pNameAr, setPNameAr] = useState("");
-  const [pDesc, setPDesc] = useState("");
-  const [pDescAr, setPDescAr] = useState("");
-  const [pPrice, setPPrice] = useState("");
-  const [pImage, setPImage] = useState("");
-  const [pCategoryId, setPCategoryId] = useState("");
-  const [pActive, setPActive] = useState(true);
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>("all");
 
   async function reloadCatalog() {
     const [pRes, cRes] = await Promise.all([
@@ -79,14 +87,18 @@ export default function AdminDashboard() {
       setLoading(false);
       return;
     }
-    Promise.all([getOrdersAction(), getAdminProductsAction(), getCategoriesAction()]).then(
-      ([ordersRes, productsRes, catRes]) => {
-        if (ordersRes.data) setOrders(ordersRes.data);
-        if (productsRes.data) setProducts(productsRes.data);
-        if (catRes.data) setCategories(catRes.data);
-        setLoading(false);
-      }
-    );
+    Promise.all([
+      getOrdersAction(),
+      getAdminProductsAction(),
+      getCategoriesAction(),
+      getAdminUsersAction(),
+    ]).then(([ordersRes, productsRes, catRes, usersRes]) => {
+      if (ordersRes.data) setOrders(ordersRes.data);
+      if (productsRes.data) setProducts(productsRes.data);
+      if (catRes.data) setCategories(catRes.data);
+      if (usersRes.data) setAdminUsers(usersRes.data);
+      setLoading(false);
+    });
   }, [user]);
 
   useEffect(() => {
@@ -104,11 +116,50 @@ export default function AdminDashboard() {
     });
   }, [user?.role, subscribeOrderUpdated]);
 
-  useEffect(() => {
-    if (categories.length && !pCategoryId) {
-      setPCategoryId(categories[0].id);
+  const pageHeader = {
+    overview: { title: t("page_title_overview"), desc: t("page_desc_overview") },
+    categories: { title: t("page_title_categories"), desc: t("page_desc_categories") },
+    products: { title: t("page_title_products"), desc: t("page_desc_products") },
+    orders: { title: t("page_title_orders"), desc: t("page_desc_orders") },
+    users: { title: t("page_title_users"), desc: t("page_desc_users") },
+  }[tab];
+
+  const sortedOrders = useMemo(
+    () => [...orders].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    [orders]
+  );
+
+  const filteredOrders = useMemo(() => {
+    let list = sortedOrders;
+    const q = orderSearch.trim().toLowerCase();
+    if (q) {
+      list = list.filter((o) => {
+        const idHit = o.id.toLowerCase().includes(q) || o.id.slice(-8).toLowerCase().includes(q);
+        const nameHit = o.user?.name?.toLowerCase().includes(q);
+        const emailHit = o.user?.email?.toLowerCase().includes(q);
+        const itemHit = o.items.some((i) => i.product.name.toLowerCase().includes(q));
+        return Boolean(idHit || nameHit || emailHit || itemHit);
+      });
     }
-  }, [categories, pCategoryId]);
+    if (orderStatusFilter !== "all") {
+      list = list.filter((o) => o.status === orderStatusFilter);
+    }
+    return list;
+  }, [sortedOrders, orderSearch, orderStatusFilter]);
+
+  const filteredProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(
+      (p) =>
+        p.name.toLowerCase().includes(q) ||
+        (p.nameAr && p.nameAr.toLowerCase().includes(q)) ||
+        p.category.name.toLowerCase().includes(q) ||
+        (p.category.nameAr && p.category.nameAr.toLowerCase().includes(q)) ||
+        (p.description && p.description.toLowerCase().includes(q)) ||
+        (p.descriptionAr && p.descriptionAr.toLowerCase().includes(q))
+    );
+  }, [products, productSearch]);
 
   if (!user || user.role !== "ADMIN") {
     return (
@@ -204,76 +255,16 @@ export default function AdminDashboard() {
     });
   }
 
-  function submitProduct(e: React.FormEvent) {
-    e.preventDefault();
-    if (!pName.trim() || !pCategoryId) {
-      toast({ title: "Name and category required", variant: "destructive" });
-      return;
-    }
-    const price = parseFloat(pPrice);
-    if (Number.isNaN(price) || price <= 0) {
-      toast({ title: "Invalid price", variant: "destructive" });
-      return;
-    }
-    const body: ProductCreateInput = {
-      name: pName.trim(),
-      price,
-      categoryId: pCategoryId,
-      isActive: pActive,
-      ...(pNameAr.trim() ? { nameAr: pNameAr.trim() } : {}),
-      ...(pDesc.trim() ? { description: pDesc.trim() } : {}),
-      ...(pDescAr.trim() ? { descriptionAr: pDescAr.trim() } : {}),
-    };
-    if (pImage.trim()) {
-      try {
-        new URL(pImage.trim());
-        body.imageUrl = pImage.trim();
-      } catch {
-        toast({ title: "Invalid image URL", variant: "destructive" });
-        return;
-      }
-    }
-
-    startTransition(async () => {
-      const res = await createProductAction(body);
-      if (res.success && res.data) {
-        setProducts((prev) => [res.data!, ...prev]);
-        setPName("");
-        setPNameAr("");
-        setPDesc("");
-        setPDescAr("");
-        setPPrice("");
-        setPImage("");
-        setPActive(true);
-        toast({ title: "Product created" });
-      } else {
-        toast({ title: res.error ?? "Failed", variant: "destructive" });
-      }
-    });
-  }
-
   async function handleDeleteCategory(id: string) {
     const res = await deleteCategoryAction(id);
     if (res.success) {
       setCategories((prev) => prev.filter((c) => c.id !== id));
-      if (pCategoryId === id) setPCategoryId("");
       await reloadCatalog();
       toast({ title: "Category deleted" });
     } else {
       toast({ title: res.error ?? "Failed", variant: "destructive" });
     }
   }
-
-  const pageHeader = {
-    overview: { title: t("page_title_overview"), desc: t("page_desc_overview") },
-    categories: { title: t("page_title_categories"), desc: t("page_desc_categories") },
-    products: { title: t("page_title_products"), desc: t("page_desc_products") },
-    orders: { title: t("page_title_orders"), desc: t("page_desc_orders") },
-  }[tab];
-
-  const sortedOrders = [...orders].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  );
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 pb-12">
@@ -414,143 +405,79 @@ export default function AdminDashboard() {
       )}
 
       {tab === "products" && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid gap-6 lg:grid-cols-5"
-        >
-          <Card className="border-primary/15 lg:col-span-2 lg:sticky lg:top-20 lg:self-start">
-            <CardHeader className="space-y-1 border-b bg-gradient-to-br from-amber-500/10 via-transparent to-primary/10 pb-4">
-              <CardTitle className="text-lg">{t("create_product")}</CardTitle>
-              <CardDescription>{t("image_optional")}</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {categories.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{t("no_categories")}</p>
-              ) : (
-                <form onSubmit={submitProduct} className="flex flex-col gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="p-cat">{t("select_category")}</Label>
-                    <select
-                      id="p-cat"
-                      value={pCategoryId}
-                      onChange={(e) => setPCategoryId(e.target.value)}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    >
-                      {categories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {locale === "ar" && c.nameAr ? c.nameAr : c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-name">{t("product_name_en")}</Label>
-                    <Input
-                      id="p-name"
-                      value={pName}
-                      onChange={(e) => setPName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-name-ar">{t("product_name_ar")}</Label>
-                    <Input
-                      id="p-name-ar"
-                      value={pNameAr}
-                      onChange={(e) => setPNameAr(e.target.value)}
-                      dir="rtl"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-desc">{t("description_en")}</Label>
-                    <textarea
-                      id="p-desc"
-                      value={pDesc}
-                      onChange={(e) => setPDesc(e.target.value)}
-                      rows={2}
-                      className="flex min-h-[72px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="p-desc-ar">{t("description_ar")}</Label>
-                    <textarea
-                      id="p-desc-ar"
-                      value={pDescAr}
-                      onChange={(e) => setPDescAr(e.target.value)}
-                      rows={2}
-                      dir="rtl"
-                      className="flex min-h-[72px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="p-price">{t("price")}</Label>
-                      <Input
-                        id="p-price"
-                        type="number"
-                        inputMode="decimal"
-                        step="0.01"
-                        min="0.01"
-                        value={pPrice}
-                        onChange={(e) => setPPrice(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="p-img">{t("image_url")}</Label>
-                      <Input
-                        id="p-img"
-                        type="url"
-                        value={pImage}
-                        onChange={(e) => setPImage(e.target.value)}
-                        placeholder="https://…"
-                      />
-                    </div>
-                  </div>
-                  <label className="flex cursor-pointer items-center gap-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={pActive}
-                      onChange={(e) => setPActive(e.target.checked)}
-                      className="h-4 w-4 rounded border-input"
-                    />
-                    {t("is_active")}
-                  </label>
-                  <Button type="submit" disabled={pending} className="w-full">
-                    {pending ? t("creating") : t("save_product")}
-                  </Button>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-
-          <Card className="border-border/80 lg:col-span-3">
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">{t("product_list")}</CardTitle>
-              <CardDescription>{products.length} items</CardDescription>
-            </CardHeader>
-            <CardContent className="max-h-[720px] overflow-y-auto pt-4">
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {products.map((product) => (
-                  <div key={product.id} className="relative">
-                    <AdminProductCard product={product} />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="icon"
-                      className="absolute end-2 top-2 z-10 h-9 w-9 shadow-md opacity-90 hover:opacity-100"
-                      aria-label={t("delete_product")}
-                      onClick={() => handleDeleteProduct(product.id)}
-                    >
-                      <Trash2 className="h-4 w-4" aria-hidden />
-                    </Button>
-                  </div>
-                ))}
+        <>
+          <AdminCreateProductDialog
+            open={productDialogOpen}
+            onOpenChange={setProductDialogOpen}
+            categories={categories}
+            onCreated={(p) => setProducts((prev) => [p, ...prev])}
+          />
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex flex-col gap-6"
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="relative w-full sm:max-w-md">
+                <Search
+                  className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+                <Input
+                  value={productSearch}
+                  onChange={(e) => setProductSearch(e.target.value)}
+                  placeholder={t("product_search_placeholder")}
+                  className="ps-9"
+                  aria-label={t("product_search_placeholder")}
+                />
               </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+              <Button
+                type="button"
+                onClick={() => setProductDialogOpen(true)}
+                className="shrink-0 gap-2 rounded-full px-6"
+                disabled={categories.length === 0}
+              >
+                <Plus className="h-4 w-4" aria-hidden />
+                {t("product_add_button")}
+              </Button>
+            </div>
+
+            <Card className="border-border/80">
+              <CardHeader className="border-b pb-4">
+                <CardTitle className="text-lg">{t("product_list")}</CardTitle>
+                <CardDescription>
+                  {t("product_list_count", {
+                    shown: filteredProducts.length,
+                    total: products.length,
+                  })}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="max-h-[720px] overflow-y-auto pt-4">
+                {filteredProducts.length === 0 ? (
+                  <p className="py-12 text-center text-sm text-muted-foreground">{t("product_search_empty")}</p>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filteredProducts.map((product) => (
+                      <div key={product.id} className="relative">
+                        <AdminProductCard product={product} />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute end-2 top-2 z-10 h-9 w-9 shadow-md opacity-90 hover:opacity-100"
+                          aria-label={t("delete_product")}
+                          onClick={() => handleDeleteProduct(product.id)}
+                        >
+                          <Trash2 className="h-4 w-4" aria-hidden />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </>
       )}
 
       {tab === "orders" && (
@@ -570,10 +497,66 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           ) : (
-            sortedOrders.map((order) => (
-              <AdminOrderCard key={order.id} order={order} onStatusChange={handleStatusChange} />
-            ))
+            <>
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+                <div className="relative min-h-10 w-full min-w-0 flex-1 sm:max-w-md">
+                  <Search
+                    className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden
+                  />
+                  <Input
+                    value={orderSearch}
+                    onChange={(e) => setOrderSearch(e.target.value)}
+                    placeholder={t("orders_search_placeholder")}
+                    className="ps-9"
+                    aria-label={t("orders_search_placeholder")}
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-1 sm:w-auto sm:min-w-[200px]">
+                  <label htmlFor="admin-order-status-filter" className="text-xs font-medium text-muted-foreground">
+                    {t("orders_filter_label")}
+                  </label>
+                  <select
+                    id="admin-order-status-filter"
+                    value={orderStatusFilter}
+                    onChange={(e) => setOrderStatusFilter(e.target.value)}
+                    className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-auto"
+                  >
+                    <option value="all">{t("orders_filter_all")}</option>
+                    {ADMIN_ORDER_STATUS_FILTERS.map((s) => (
+                      <option key={s} value={s}>
+                        {tOrderStatus(s)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              {filteredOrders.length === 0 ? (
+                <Card className="border-dashed">
+                  <CardContent className="py-12 text-center text-sm text-muted-foreground">
+                    {t("orders_search_empty")}
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredOrders.map((order) => (
+                  <AdminOrderCard key={order.id} order={order} onStatusChange={handleStatusChange} />
+                ))
+              )}
+            </>
           )}
+        </motion.div>
+      )}
+
+      {tab === "users" && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+          <AdminUsersPanel
+            users={adminUsers}
+            onUserUpdated={(u) =>
+              setAdminUsers((prev) =>
+                prev.map((x) => (x.id === u.id ? { ...x, ...u, _count: x._count } : x))
+              )
+            }
+          />
         </motion.div>
       )}
     </div>

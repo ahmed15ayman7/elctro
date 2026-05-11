@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-export type AdminTab = "overview" | "categories" | "products" | "orders";
+export type AdminTab = "overview" | "categories" | "products" | "orders" | "users";
 
 type AdminLayoutContextValue = {
   tab: AdminTab;

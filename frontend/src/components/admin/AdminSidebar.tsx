@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Package,
   ShoppingBag,
+  Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ const NAV: { key: AdminTab; icon: typeof LayoutDashboard }[] = [
   { key: "categories", icon: FolderTree },
   { key: "products", icon: Package },
   { key: "orders", icon: ShoppingBag },
+  { key: "users", icon: Users },
 ];
 
 export default function AdminSidebar() {
@@ -26,6 +28,7 @@ export default function AdminSidebar() {
     categories: t("categories"),
     products: t("products"),
     orders: t("orders"),
+    users: t("users"),
   };
 
   return (
