@@ -45,6 +45,7 @@ services:
 
   # ─── Frontend (Next.js) ───────────────────────────────────────────────────────
   frontend:
+    platform: linux/amd64
     build:
       context: ./frontend
       dockerfile: Dockerfile
