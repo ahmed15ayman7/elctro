@@ -27,7 +27,7 @@ export default function LoginForm() {
       if (result.success && result.data) {
         setAuth(result.data.user);
         toast({ title: "Welcome back!", description: result.data.user.name });
-        router.push("/");
+        router.push(result.data.user.role === "ADMIN" ? "/admin" : "/");
       } else {
         toast({ title: result.error ?? "Login failed", variant: "destructive" });
       }

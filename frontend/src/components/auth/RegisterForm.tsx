@@ -27,7 +27,7 @@ export default function RegisterForm() {
       if (result.success && result.data) {
         setAuth(result.data.user);
         toast({ title: "Account created!", description: `Welcome, ${result.data.user.name}!` });
-        router.push("/");
+        router.push(result.data.user.role === "ADMIN" ? "/admin" : "/");
       } else {
         toast({ title: result.error ?? "Registration failed", variant: "destructive" });
       }

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Package, ShoppingBag, Sparkles } from "lucide-react";
+import { BarChart3, Package, ShoppingBag, Sparkles, Trash2 } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
 import AdminCharts from "@/components/admin/AdminCharts";
+import AdminProductCard from "@/components/admin/AdminProductCard";
 import { getOrdersAction, updateOrderStatusAction, type Order } from "@/actions/orders.actions";
 import {
   getAdminProductsAction,
@@ -526,36 +527,24 @@ export default function AdminDashboard() {
               <CardTitle className="text-lg">{t("product_list")}</CardTitle>
               <CardDescription>{products.length} items</CardDescription>
             </CardHeader>
-            <CardContent className="max-h-[720px] space-y-2 overflow-y-auto pt-4">
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card/50 px-4 py-3"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-medium">{product.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {product.category.name} ·{" "}
-                      <span className="tabular-nums">
-                        {formatCurrency(parseFloat(product.price), locale)}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="flex shrink-0 items-center gap-2">
-                    <Badge variant={product.isActive ? "success" : "secondary"}>
-                      {product.isActive ? "Active" : "Inactive"}
-                    </Badge>
+            <CardContent className="max-h-[720px] overflow-y-auto pt-4">
+              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                {products.map((product) => (
+                  <div key={product.id} className="relative">
+                    <AdminProductCard product={product} />
                     <Button
                       type="button"
                       variant="destructive"
-                      size="sm"
+                      size="icon"
+                      className="absolute end-2 top-2 z-10 h-9 w-9 shadow-md opacity-90 hover:opacity-100"
+                      aria-label={t("delete_product")}
                       onClick={() => handleDeleteProduct(product.id)}
                     >
-                      {t("delete_product")}
+                      <Trash2 className="h-4 w-4" aria-hidden />
                     </Button>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </CardContent>
           </Card>
         </motion.div>

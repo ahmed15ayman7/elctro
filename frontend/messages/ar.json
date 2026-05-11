@@ -127,7 +127,17 @@
     "shell_nav": "أقسام الإدارة",
     "chart_orders_by_status": "الطلبات حسب الحالة",
     "chart_revenue_by_day": "الإيرادات اليومية (آخر 14 يومًا بها نشاط)",
-    "chart_empty": "تظهر الرسوم البيانية عند وجود طلبات."
+    "chart_empty": "تظهر الرسوم البيانية عند وجود طلبات.",
+    "status_active": "نشط",
+    "status_inactive": "مخفي",
+    "view_product": "عرض التفاصيل",
+    "no_description": "لا يوجد وصف بعد.",
+    "back_to_catalog": "العودة للقائمة",
+    "product_detail_meta": "الإدارة · منتج",
+    "product_description": "الوصف",
+    "delete_product_confirm": "حذف هذا المنتج نهائيًا؟",
+    "delete_failed": "تعذر حذف المنتج.",
+    "deleting": "جاري الحذف…"
   },
   "common": {
     "loading": "جاري التحميل...",
