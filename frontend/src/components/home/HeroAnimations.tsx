@@ -24,7 +24,11 @@ const containerVariants = {
 
 const itemVariants = {
   hidden: { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+  },
 };
 
 export default function HeroAnimations({
@@ -66,28 +70,39 @@ export default function HeroAnimations({
         {description}
       </motion.p>
 
-      <motion.div variants={itemVariants} className="flex flex-wrap justify-center gap-3 md:gap-4">
+      <motion.div
+        variants={itemVariants}
+        className="flex flex-wrap justify-center gap-3 md:gap-4"
+      >
         <Link href="/menu" className="pointer-events-auto">
-          <Button size="lg" className="gap-2 rounded-full px-8 text-base shadow-lg shadow-primary/30">
+          <Button
+            size="lg"
+            className="gap-2 rounded-full px-8 text-base shadow-lg shadow-primary/30"
+          >
             {ctaOrder}
             <ArrowRight className="h-5 w-5 rtl-flip" />
           </Button>
         </Link>
         <Link href="/menu" className="pointer-events-auto">
-          <Button variant="outline" size="lg" className="rounded-full border-primary/30 px-8 text-base">
+          <Button
+            variant="outline"
+            size="lg"
+            className="rounded-full border-primary/30 px-8 text-base"
+          >
             {ctaExplore}
           </Button>
         </Link>
       </motion.div>
 
+      {/* Scroll indicator */}
       <motion.div
-        variants={itemVariants}
-        animate={{ y: [0, 6, 0] }}
-        transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-        className="mt-6 text-muted-foreground"
-        aria-hidden
+        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        animate={{ y: [0, 8, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity }}
       >
-        <ChevronDown className="h-6 w-6" />
+        <div className="w-6 h-10 rounded-full border-2 border-[#C9A227]/40 flex items-start justify-center pt-2">
+          <div className="w-1 h-3 rounded-full bg-[#C9A227]/60" />
+        </div>
       </motion.div>
     </motion.div>
   );
