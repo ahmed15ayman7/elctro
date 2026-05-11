@@ -13,6 +13,7 @@ const HeroScene = dynamic(() => import("@/components/three/HeroScene"));
 
 type Props = { params: Promise<{ locale: string }> };
 
+
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations("home");
