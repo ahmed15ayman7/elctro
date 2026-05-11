@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, ChevronUp, MapPin, Package, Receipt } from "lucide-react";
+import { ChevronDown, ChevronUp, MapPin, Package, Receipt, UtensilsCrossed } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/auth.store";
 import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { getOrdersAction, type Order } from "@/actions/orders.actions";
+import EmptyOrdersIllustration from "@/components/orders/EmptyOrdersIllustration";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -95,20 +96,42 @@ export default function OrdersClient() {
 
   if (orders.length === 0) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-8 rounded-3xl border border-dashed border-border bg-muted/20 px-8 py-16 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-          <Package className="h-10 w-10 text-muted-foreground" aria-hidden />
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+        className="mx-auto max-w-3xl"
+      >
+        <div className="relative overflow-hidden rounded-3xl border border-border/60 bg-gradient-to-br from-card via-background to-muted/40 shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+          <div
+            className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/12 blur-3xl"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none absolute -bottom-16 -left-12 h-56 w-56 rounded-full bg-orange-400/10 blur-3xl"
+            aria-hidden
+          />
+
+          <div className="relative flex flex-col items-center px-6 py-12 text-center md:px-10 md:py-14">
+            <EmptyOrdersIllustration className="h-40 w-auto max-w-[min(100%,260px)] md:h-48" />
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Package className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {t("empty_badge")}
+            </div>
+            <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground md:text-3xl">{t("empty_heading")}</h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground md:text-base">
+              {t("empty_subtitle")}
+            </p>
+            <Button asChild size="lg" className="mt-8 rounded-full px-10 shadow-md shadow-primary/25">
+              <Link href="/menu" className="gap-2">
+                <UtensilsCrossed className="h-4 w-4" aria-hidden />
+                {t("browse_menu")}
+              </Link>
+            </Button>
+            <p className="mt-5 max-w-sm text-xs leading-relaxed text-muted-foreground md:text-sm">{t("empty_footer")}</p>
+          </div>
         </div>
-        <div className="space-y-2">
-          <h2 className="text-xl font-semibold">{t("empty_title")}</h2>
-          <p className="text-muted-foreground">{t("no_orders")}</p>
-        </div>
-        <Link href="/menu">
-          <Button size="lg" className="rounded-full px-8">
-            {t("browse_menu")}
-          </Button>
-        </Link>
-      </div>
+      </motion.div>
     );
   }
 

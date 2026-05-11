@@ -48,6 +48,12 @@ export default function Navbar() {
         {/* Nav links — scroll on small screens */}
         <nav className="flex max-w-[55vw] items-center gap-4 overflow-x-auto whitespace-nowrap pr-1 text-sm sm:max-w-none md:gap-6">
           <Link
+            href="/"
+            className="font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("home")}
+          </Link>
+          <Link
             href="/menu"
             className="font-medium text-muted-foreground transition-colors hover:text-foreground"
           >

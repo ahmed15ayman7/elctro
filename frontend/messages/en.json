@@ -1,5 +1,6 @@
 {
   "nav": {
+    "home": "Home",
     "menu": "Menu",
     "cart": "Cart",
     "orders": "Orders",
@@ -118,6 +119,10 @@
     "login_title": "Sign in to continue",
     "login_subtitle": "We show your personal order history only when you are logged in.",
     "empty_title": "No orders yet",
+    "empty_badge": "Fresh start",
+    "empty_heading": "No orders yet — your table is ready",
+    "empty_subtitle": "Pick something from the menu, check out once, and your deliveries will show up here with live status updates.",
+    "empty_footer": "After your first order, you can expand any row to see items, address, and totals.",
     "no_orders": "You have not placed any orders yet. Start with something delicious from the menu.",
     "browse_menu": "Browse menu",
     "items_heading": "Items in this order",
