@@ -12,8 +12,7 @@ import {
 import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/auth.store";
 import type { Order } from "@/actions/orders.actions";
-import { getSocketUrl, SOCKET_IO_PATH, registerBrowserSocket } from "@/lib/socket";
-import { apiRequest } from "@/lib/api";
+import { getSocketUrl, SOCKET_IO_PATH } from "@/lib/socket";
 
 export type OrderUpdatedPayload = { order: Order };
 
@@ -23,6 +22,11 @@ type SocketContextValue = {
 };
 
 const SocketContext = createContext<SocketContextValue | null>(null);
+
+const SOCKET_URL =
+  typeof window !== "undefined"
+    ? (process.env.NEXT_PUBLIC_SOCKET_URL ?? "http://localhost:4000")
+    : "";
 
 export function SocketProvider({ children }: { children: ReactNode }) {
   const user = useAuthStore((s) => s.user);
@@ -46,17 +50,20 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     }
 
     let cancelled = false;
-    const socketUrl = getSocketUrl();
-    if (!socketUrl) return;
+    const socketUrl = SOCKET_URL;
 
     (async () => {
       try {
-        const res = await apiRequest<{ token?: string }>(  "/api/socket-handoff", { attachAuth: false });
-        if (!res || cancelled) return;
-        if (!res?.token || cancelled) return;
+        const res = await fetch("/api/socket-handoff", { credentials: "same-origin" });
+        if (!res.ok || cancelled) return;
+        const data = (await res.json()) as { token?: string };
+        if (!data.token || cancelled) return;
 
         const socket = io(socketUrl, {
-          path: SOCKET_IO_PATH, auth: { token: res.token }, transports: ["websocket", "polling"], autoConnect: true,
+          path: "/socket.io",
+          auth: { token: data.token },
+          transports: ["websocket", "polling"],
+          autoConnect: true,
         });
 
         socket.on("connect", () => {
@@ -81,7 +88,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         });
 
         socketRef.current = socket;
-        registerBrowserSocket(socket);
       } catch {
         setConnected(false);
       }
@@ -89,7 +95,6 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     return () => {
       cancelled = true;
-      registerBrowserSocket(null);
       socketRef.current?.disconnect();
       socketRef.current = null;
       setConnected(false);
