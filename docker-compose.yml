@@ -37,7 +37,6 @@ services:
       ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
       REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-7d}
       PORT: 4000
-      NODE_ENV: ${NODE_ENV:-production}
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
     ports:
       - "4000:4000"
@@ -58,7 +57,6 @@ services:
     environment:
       # Server-side env (Server Actions use this to talk to backend internally)
       API_BASE_URL: http://backend:4000
-      NODE_ENV: ${NODE_ENV:-production}
     ports:
       - "3000:3000"
     networks:
