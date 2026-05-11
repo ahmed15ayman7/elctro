@@ -11,7 +11,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5435:5435"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-elctro_user} -d ${POSTGRES_DB:-elctro_db}"]
       interval: 10s
@@ -31,7 +31,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-elctro_user}:${POSTGRES_PASSWORD:-elctro_pass}@postgres:5432/${POSTGRES_DB:-elctro_db}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-elctro_user}:${POSTGRES_PASSWORD:-elctro_pass}@postgres:5435/${POSTGRES_DB:-elctro_db}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-in-production}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-change-me-refresh-secret-in-production}
       ACCESS_TOKEN_TTL: ${ACCESS_TOKEN_TTL:-15m}
