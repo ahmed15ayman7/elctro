@@ -2,7 +2,17 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import { BarChart3, Package, Plus, Search, ShoppingBag, Sparkles, Trash2 } from "lucide-react";
+import {
+  BarChart3,
+  Clock,
+  Package,
+  Plus,
+  Search,
+  ShoppingBag,
+  Sparkles,
+  Trash2,
+  Users,
+} from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +25,7 @@ import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
 import AdminCharts from "@/components/admin/AdminCharts";
 import AdminCreateProductDialog from "@/components/admin/AdminCreateProductDialog";
+import AdminOverviewQuickActions from "@/components/admin/AdminOverviewQuickActions";
 import AdminOrderCard from "@/components/admin/AdminOrderCard";
 import AdminProductCard from "@/components/admin/AdminProductCard";
 import AdminUsersPanel from "@/components/admin/AdminUsersPanel";
@@ -56,7 +67,7 @@ export default function AdminDashboard() {
   const locale = useLocale();
   const { user } = useAuthStore();
   const { subscribeOrderUpdated } = useOrderRealtime();
-  const { tab } = useAdminLayout();
+  const { tab, setTab } = useAdminLayout();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -184,6 +195,10 @@ export default function AdminDashboard() {
     .filter((o) => o.status === "DELIVERED")
     .reduce((sum, o) => sum + parseFloat(o.total), 0);
 
+  const pipelineCount = orders.filter((o) =>
+    ["PENDING", "CONFIRMED", "PREPARING", "OUT_FOR_DELIVERY"].includes(o.status)
+  ).length;
+
   const stats = [
     {
       key: "orders",
@@ -208,6 +223,22 @@ export default function AdminDashboard() {
       icon: Package,
       color: "text-orange-600",
       bg: "bg-orange-50 dark:bg-orange-950/40",
+    },
+    {
+      key: "pipeline",
+      label: t("overview_pipeline"),
+      value: pipelineCount,
+      icon: Clock,
+      color: "text-amber-700",
+      bg: "bg-amber-50 dark:bg-amber-950/40",
+    },
+    {
+      key: "users",
+      label: t("overview_user_accounts"),
+      value: adminUsers.length,
+      icon: Users,
+      color: "text-violet-600",
+      bg: "bg-violet-50 dark:bg-violet-950/40",
     },
   ];
 
@@ -266,8 +297,27 @@ export default function AdminDashboard() {
     }
   }
 
+  function handleQuickAddProduct() {
+    if (categories.length === 0) {
+      toast({
+        title: t("no_categories"),
+        description: t("qa_create_category_first"),
+        variant: "destructive",
+      });
+      setTab("categories");
+      return;
+    }
+    setProductDialogOpen(true);
+  }
+
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 pb-12">
+      <AdminCreateProductDialog
+        open={productDialogOpen}
+        onOpenChange={setProductDialogOpen}
+        categories={categories}
+        onCreated={(p) => setProducts((prev) => [p, ...prev])}
+      />
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
@@ -284,25 +334,46 @@ export default function AdminDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+            transition={{ duration: 0.3 }}
+          >
+            <AdminOverviewQuickActions
+              onNavigate={setTab}
+              onAddProduct={handleQuickAddProduct}
+              categoriesEmpty={categories.length === 0}
+            />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.05 }}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
           >
             {stats.map((stat) => (
-              <Card key={stat.key} className="overflow-hidden border-primary/10 shadow-sm">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+              <Card
+                key={stat.key}
+                className="overflow-hidden border-border/70 bg-gradient-to-br from-card to-muted/20 shadow-sm ring-1 ring-black/[0.03] dark:ring-white/[0.05]"
+              >
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-4">
+                  <CardTitle className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     {stat.label}
                   </CardTitle>
                   <div className={`rounded-lg p-2 ${stat.bg}`}>
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} aria-hidden />
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold tabular-nums">{stat.value}</p>
+                <CardContent className="pb-4 pt-0">
+                  <p className="text-2xl font-bold tabular-nums tracking-tight">{stat.value}</p>
                 </CardContent>
               </Card>
             ))}
           </motion.div>
-          <AdminCharts orders={orders} locale={locale} />
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.08 }}
+          >
+            <AdminCharts orders={orders} locale={locale} />
+          </motion.div>
         </>
       )}
 
@@ -406,12 +477,6 @@ export default function AdminDashboard() {
 
       {tab === "products" && (
         <>
-          <AdminCreateProductDialog
-            open={productDialogOpen}
-            onOpenChange={setProductDialogOpen}
-            categories={categories}
-            onCreated={(p) => setProducts((prev) => [p, ...prev])}
-          />
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
