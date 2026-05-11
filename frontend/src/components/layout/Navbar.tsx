@@ -42,18 +42,24 @@ export default function Navbar() {
           <span className="text-xl font-bold">Elctro</span>
         </Link>
 
-        {/* Nav links */}
-        <nav className="hidden items-center gap-6 md:flex">
+        {/* Nav links — scroll on small screens */}
+        <nav className="flex max-w-[55vw] items-center gap-4 overflow-x-auto whitespace-nowrap pr-1 text-sm sm:max-w-none md:gap-6">
           <Link
             href="/menu"
-            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             {t("menu")}
+          </Link>
+          <Link
+            href="/about"
+            className="font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {t("about_us")}
           </Link>
           {user && (
             <Link
               href="/orders"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("orders")}
             </Link>
@@ -61,7 +67,7 @@ export default function Navbar() {
           {user?.role === "ADMIN" && (
             <Link
               href="/admin"
-              className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              className="font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               {t("admin")}
             </Link>

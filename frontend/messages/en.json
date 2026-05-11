@@ -6,16 +6,46 @@
     "admin": "Admin",
     "login": "Login",
     "logout": "Logout",
-    "register": "Register"
+    "register": "Register",
+    "about_us": "About"
   },
   "home": {
+    "hero_badge": "Fresh food, delivered",
     "hero_title": "Delicious Food",
     "hero_subtitle": "Delivered Fast",
     "hero_description": "Order from our wide selection of fresh, high-quality meals and get them delivered right to your door.",
     "cta_order": "Order Now",
     "cta_explore": "Explore Menu",
-    "featured_title": "Featured Items",
-    "categories_title": "Browse Categories"
+    "featured_title": "Featured picks",
+    "featured_subtitle": "Customer favourites from our kitchen — tap through to the full menu anytime.",
+    "categories_title": "Browse by category",
+    "categories_subtitle": "Jump straight into burgers, sides, drinks, and more.",
+    "value_title": "Built for hungry people",
+    "value_subtitle": "Quality ingredients, clear pricing, and updates you can trust from checkout to your doorstep.",
+    "how_title": "How it works",
+    "how_subtitle": "Three simple steps from craving to delivery.",
+    "step1_title": "Browse the menu",
+    "step1_desc": "Filter by category, compare prices, and add items to your cart in seconds.",
+    "step2_title": "Checkout securely",
+    "step2_desc": "Enter your address, choose payment, and confirm — we keep your details protected.",
+    "step3_title": "Track & enjoy",
+    "step3_desc": "Watch your order status update live. We notify you when it is on the way.",
+    "cta_band_title": "Ready to eat?",
+    "cta_band_desc": "Open the menu, build your meal, and we will handle the rest.",
+    "features": {
+      "fast": {
+        "title": "Fast delivery",
+        "desc": "Optimized routes and handoffs so your food arrives hot when you need it."
+      },
+      "safe": {
+        "title": "Secure checkout",
+        "desc": "Modern auth, encrypted sessions, and clear receipts for every order."
+      },
+      "track": {
+        "title": "Live updates",
+        "desc": "See status changes in real time from the kitchen to your door."
+      }
+    }
   },
   "menu": {
     "title": "Our Menu",
@@ -52,8 +82,15 @@
     "track_order": "Track Order"
   },
   "orders": {
-    "title": "My Orders",
-    "no_orders": "You haven't placed any orders yet.",
+    "title": "My orders",
+    "subtitle": "Track status, totals, and line items for every order in one place.",
+    "badge": "Order history",
+    "login_title": "Sign in to continue",
+    "login_subtitle": "We show your personal order history only when you are logged in.",
+    "empty_title": "No orders yet",
+    "no_orders": "You have not placed any orders yet. Start with something delicious from the menu.",
+    "browse_menu": "Browse menu",
+    "items_heading": "Items in this order",
     "order_number": "Order #{id}",
     "status": "Status",
     "total": "Total",
@@ -138,6 +175,33 @@
     "delete_product_confirm": "Delete this product permanently?",
     "delete_failed": "Could not delete the product.",
     "deleting": "Deleting…"
+  },
+  "footer": {
+    "tagline": "Order fresh meals online with live updates from checkout to your door.",
+    "company_heading": "Company",
+    "about": "About us",
+    "legal_heading": "Legal",
+    "privacy": "Privacy policy",
+    "terms": "Terms & conditions",
+    "rights": "All rights reserved."
+  },
+  "about": {
+    "meta_title": "About Elctro",
+    "title": "About Elctro",
+    "lead": "We are a modern food ordering experience focused on speed, clarity, and reliability.",
+    "body": "Elctro connects hungry customers with a curated menu of dishes prepared with care. Our platform is designed to make browsing, checkout, and order tracking simple on every device.\n\nWhether you are ordering lunch for the office or dinner for the family, we aim to keep you informed at every step—from confirmation to preparation and delivery.\n\nThis page describes our product vision. For data handling and your rights, please read our Privacy Policy. For rules of use, see Terms & Conditions."
+  },
+  "privacy": {
+    "meta_title": "Privacy Policy — Elctro",
+    "title": "Privacy policy",
+    "updated": "Last updated: 2026. This summary is provided for transparency; adapt with your legal counsel for production.",
+    "body": "We collect information you provide when you create an account, place an order, or contact us—such as your name, email, delivery address, and payment preferences where applicable.\n\nWe use this information to operate the service: authenticate you, process orders, send transactional updates, and improve reliability and security.\n\nWe store session tokens in secure cookies where needed for authentication. We do not sell your personal data to third parties for marketing.\n\nYou may request access or deletion of your account data where applicable by contacting support. We may update this policy from time to time; the “last updated” date will change accordingly."
+  },
+  "terms": {
+    "meta_title": "Terms & Conditions — Elctro",
+    "title": "Terms & conditions",
+    "updated": "Last updated: 2026. Replace with counsel-approved terms before launch.",
+    "body": "By using Elctro you agree to follow these terms and any policies referenced here.\n\nYou must provide accurate delivery information. Prices and availability are shown at checkout and may change as the menu is updated.\n\nOrders are binding once confirmed. Cancellations or refunds follow the rules shown at checkout and any applicable consumer law.\n\nYou agree not to misuse the platform (including attempting to disrupt service, scrape data without permission, or access accounts that are not yours).\n\nWe provide the service “as is” to the extent permitted by law and may modify features or these terms with reasonable notice where required."
   },
   "common": {
     "loading": "Loading...",
