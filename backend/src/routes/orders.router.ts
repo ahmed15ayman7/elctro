@@ -7,8 +7,14 @@ import {
   type AuthenticatedRequest,
 } from "../middleware/authenticate.js";
 import { ForbiddenError, NotFoundError } from "../lib/errors.js";
+import { emitOrderUpdated } from "../socket.js";
 
 const router = Router();
+
+const orderListInclude = {
+  items: { include: { product: { select: { id: true, name: true, imageUrl: true } } } },
+  user: { select: { id: true, name: true, email: true } },
+} as const;
 
 const orderItemSchema = z.object({
   productId: z.string().cuid(),
@@ -78,11 +84,10 @@ router.post(
           total,
           items: { create: orderItems },
         },
-        include: {
-          items: { include: { product: { select: { id: true, name: true, imageUrl: true } } } },
-        },
+        include: orderListInclude,
       });
 
+      emitOrderUpdated(order as unknown as Record<string, unknown>);
       res.status(201).json(order);
     } catch (err) {
       next(err);
@@ -100,10 +105,7 @@ router.get(
       const { id: userId, role } = (req as AuthenticatedRequest).user;
       const orders = await prisma.order.findMany({
         where: role === "ADMIN" ? {} : { userId },
-        include: {
-          items: { include: { product: { select: { id: true, name: true, imageUrl: true } } } },
-          user: { select: { id: true, name: true, email: true } },
-        },
+        include: orderListInclude,
         orderBy: { createdAt: "desc" },
       });
       res.json(orders);
@@ -150,10 +152,16 @@ router.patch(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { status } = updateStatusSchema.parse(req.body);
-      const order = await prisma.order.update({
+      await prisma.order.update({
         where: { id: req.params.id },
         data: { status },
       });
+      const order = await prisma.order.findUnique({
+        where: { id: req.params.id },
+        include: orderListInclude,
+      });
+      if (!order) throw new NotFoundError("Order not found");
+      emitOrderUpdated(order as unknown as Record<string, unknown>);
       res.json(order);
     } catch (err) {
       next(err);

@@ -23,7 +23,8 @@
     "all_categories": "الكل",
     "no_results": "لا توجد عناصر.",
     "add_to_cart": "أضف إلى السلة",
-    "added": "تمت الإضافة!"
+    "added": "تمت الإضافة!",
+    "price_label": "السعر"
   },
   "cart": {
     "title": "سلتك",
@@ -121,7 +122,12 @@
     "save_product": "إنشاء المنتج",
     "product_list": "كل المنتجات",
     "no_categories": "لا توجد تصنيفات بعد. أنشئ تصنيفًا أولاً.",
-    "creating": "جاري الحفظ…"
+    "creating": "جاري الحفظ…",
+    "storefront": "العودة للمتجر",
+    "shell_nav": "أقسام الإدارة",
+    "chart_orders_by_status": "الطلبات حسب الحالة",
+    "chart_revenue_by_day": "الإيرادات اليومية (آخر 14 يومًا بها نشاط)",
+    "chart_empty": "تظهر الرسوم البيانية عند وجود طلبات."
   },
   "common": {
     "loading": "جاري التحميل...",

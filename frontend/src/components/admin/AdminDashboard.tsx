@@ -2,14 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { motion } from "framer-motion";
-import {
-  BarChart3,
-  FolderTree,
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  Sparkles,
-} from "lucide-react";
+import { BarChart3, Package, ShoppingBag, Sparkles } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { useAuthStore } from "@/store/auth.store";
+import { useOrderRealtime } from "@/components/providers/SocketProvider";
+import { useAdminLayout } from "@/components/admin/AdminLayoutContext";
+import AdminCharts from "@/components/admin/AdminCharts";
 import { getOrdersAction, updateOrderStatusAction, type Order } from "@/actions/orders.actions";
 import {
   getAdminProductsAction,
@@ -52,16 +47,15 @@ function slugify(name: string): string {
     .slice(0, 100);
 }
 
-type AdminTab = "overview" | "categories" | "products" | "orders";
-
 export default function AdminDashboard() {
   const t = useTranslations("admin");
   const locale = useLocale();
   const { user } = useAuthStore();
+  const { subscribeOrderUpdated } = useOrderRealtime();
+  const { tab } = useAdminLayout();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [tab, setTab] = useState<AdminTab>("overview");
   const [loading, setLoading] = useState(true);
   const [pending, startTransition] = useTransition();
 
@@ -101,6 +95,21 @@ export default function AdminDashboard() {
       }
     );
   }, [user]);
+
+  useEffect(() => {
+    if (user?.role !== "ADMIN") return;
+    return subscribeOrderUpdated(({ order }) => {
+      setOrders((prev) => {
+        const i = prev.findIndex((o) => o.id === order.id);
+        if (i >= 0) {
+          const next = [...prev];
+          next[i] = order;
+          return next;
+        }
+        return [order, ...prev];
+      });
+    });
+  }, [user?.role, subscribeOrderUpdated]);
 
   useEffect(() => {
     if (categories.length && !pCategoryId) {
@@ -262,19 +271,12 @@ export default function AdminDashboard() {
     }
   }
 
-  const tabs: { key: AdminTab; label: string; icon: typeof LayoutDashboard }[] = [
-    { key: "overview", label: t("dashboard"), icon: LayoutDashboard },
-    { key: "categories", label: t("categories"), icon: FolderTree },
-    { key: "products", label: t("products"), icon: Package },
-    { key: "orders", label: t("orders"), icon: ShoppingBag },
-  ];
-
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-8 pb-12">
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <div className="mb-1 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Sparkles className="h-3.5 w-3.5" aria-hidden />
             Admin
           </div>
           <h1 className="text-3xl font-bold tracking-tight">{t("catalog_title")}</h1>
@@ -282,50 +284,31 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 rounded-xl border bg-muted/40 p-1.5">
-        {tabs.map((tb) => {
-          const Icon = tb.icon;
-          const active = tab === tb.key;
-          return (
-            <button
-              key={tb.key}
-              type="button"
-              onClick={() => setTab(tb.key)}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all ${
-                active
-                  ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-                  : "text-muted-foreground hover:bg-background/60 hover:text-foreground"
-              }`}
-            >
-              <Icon className="h-4 w-4 shrink-0 opacity-80" />
-              {tb.label}
-            </button>
-          );
-        })}
-      </div>
-
       {tab === "overview" && (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-3"
-        >
-          {stats.map((stat) => (
-            <Card key={stat.key} className="overflow-hidden border-primary/10 shadow-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  {stat.label}
-                </CardTitle>
-                <div className={`rounded-lg p-2 ${stat.bg}`}>
-                  <stat.icon className={`h-4 w-4 ${stat.color}`} />
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold tabular-nums">{stat.value}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </motion.div>
+        <>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-3"
+          >
+            {stats.map((stat) => (
+              <Card key={stat.key} className="overflow-hidden border-primary/10 shadow-sm">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                    {stat.label}
+                  </CardTitle>
+                  <div className={`rounded-lg p-2 ${stat.bg}`}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-2xl font-bold tabular-nums">{stat.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </motion.div>
+          <AdminCharts orders={orders} locale={locale} />
+        </>
       )}
 
       {tab === "categories" && (
@@ -609,8 +592,6 @@ export default function AdminDashboard() {
           ))}
         </motion.div>
       )}
-
-      <Separator className="opacity-50" />
     </div>
   );
 }

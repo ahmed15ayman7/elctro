@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth.store";
+import { useOrderRealtime } from "@/components/providers/SocketProvider";
 import { getOrdersAction, type Order } from "@/actions/orders.actions";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -25,6 +26,7 @@ export default function OrdersClient() {
   const t = useTranslations("orders");
   const locale = useLocale();
   const { user } = useAuthStore();
+  const { subscribeOrderUpdated } = useOrderRealtime();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -39,6 +41,24 @@ export default function OrdersClient() {
       setLoading(false);
     });
   }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    return subscribeOrderUpdated(({ order }) => {
+      setOrders((prev) => {
+        const i = prev.findIndex((o) => o.id === order.id);
+        if (i >= 0) {
+          const next = [...prev];
+          next[i] = order;
+          return next;
+        }
+        if (order.userId === user.id) {
+          return [order, ...prev];
+        }
+        return prev;
+      });
+    });
+  }, [user, subscribeOrderUpdated]);
 
   if (loading) {
     return (

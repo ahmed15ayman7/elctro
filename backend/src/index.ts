@@ -1,9 +1,11 @@
 import "dotenv/config";
+import http from "http";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { setupSwagger } from "./docs/swagger.js";
+import { initSocket } from "./socket.js";
 import authRouter from "./routes/auth.router.js";
 import productsRouter from "./routes/products.router.js";
 import categoriesRouter from "./routes/categories.router.js";
@@ -46,9 +48,20 @@ app.use("/api/users", usersRouter);
 // ─── Global error handler ─────────────────────────────────────────────────────
 app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`[server] Listening on http://localhost:${PORT}`);
-  console.log(`[server] Environment: ${process.env.NODE_ENV ?? "development"}`);
-});
+const httpServer = http.createServer(app);
+
+initSocket(httpServer)
+  .then(() => {
+    httpServer.listen(PORT, () => {
+      console.log(`[server] Listening on http://localhost:${PORT}`);
+      console.log(`[server] Environment: ${process.env.NODE_ENV ?? "development"}`);
+      console.log(`[socket] Socket.io on path /socket.io`);
+    });
+  })
+  .catch((err) => {
+    console.error("[server] Failed to initialize Socket.io / Redis:", err);
+    process.exit(1);
+  });
 
 export default app;
+export { httpServer };

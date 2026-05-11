@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authenticateAccess, requireAdmin } from "../middleware/authenticate.js";
 import { NotFoundError } from "../lib/errors.js";
+import { emitCatalogChanged } from "../socket.js";
 
 const router = Router();
 
@@ -44,6 +45,7 @@ router.post(
     try {
       const data = categorySchema.parse(req.body);
       const category = await prisma.category.create({ data });
+      emitCatalogChanged();
       res.status(201).json(category);
     } catch (err) {
       next(err);
@@ -62,6 +64,7 @@ router.put(
         where: { id: req.params.id },
         data,
       });
+      emitCatalogChanged();
       res.json(category);
     } catch (err) {
       next(err);
@@ -76,6 +79,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await prisma.category.delete({ where: { id: req.params.id } });
+      emitCatalogChanged();
       res.status(204).send();
     } catch (err) {
       next(err);

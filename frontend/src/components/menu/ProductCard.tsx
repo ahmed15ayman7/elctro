@@ -2,15 +2,14 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ShoppingCart, Star } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCartStore } from "@/store/cart.store";
 import { toast } from "@/hooks/use-toast";
 import type { Product } from "@/actions/products.actions";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 interface Props {
   product: Product;
@@ -40,30 +39,41 @@ export default function ProductCard({ product }: Props) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -4 }}
-      transition={{ duration: 0.2 }}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.22, ease: [0.25, 0.1, 0.25, 1] }}
+      className="group h-full"
     >
-      <Card className="overflow-hidden group cursor-pointer h-full flex flex-col">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden bg-muted">
+      <div
+        className={cn(
+          "flex h-full flex-col overflow-hidden rounded-2xl border bg-card text-card-foreground shadow-sm",
+          "ring-1 ring-border/60 transition-shadow duration-200",
+          "hover:shadow-md hover:ring-border"
+        )}
+      >
+        <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           {product.imageUrl ? (
             <Image
               src={product.imageUrl}
               alt={displayName}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-orange-100 to-amber-50">
+            <div
+              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-100 to-amber-50 dark:from-orange-950/40 dark:to-amber-950/20"
+              aria-hidden
+            >
               <span className="text-5xl">🍔</span>
             </div>
           )}
-          <div className="absolute top-2 start-2">
-            <Badge variant="default" className="text-xs">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-80 transition-opacity duration-200 group-hover:opacity-95" />
+          <div className="absolute start-3 top-3 z-[1]">
+            <Badge variant="secondary" className="text-xs font-medium shadow-sm backdrop-blur-sm">
               {product.category.nameAr && locale === "ar"
                 ? product.category.nameAr
                 : product.category.name}
@@ -71,33 +81,35 @@ export default function ProductCard({ product }: Props) {
           </div>
         </div>
 
-        <CardContent className="flex flex-col gap-3 p-4 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1">
-              <h3 className="font-semibold leading-tight line-clamp-1">{displayName}</h3>
-              {displayDesc && (
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{displayDesc}</p>
-              )}
-            </div>
+        <div className="flex flex-1 flex-col gap-3 p-4 pt-3">
+          <div className="space-y-1">
+            <h3 className="text-base font-semibold leading-snug tracking-tight line-clamp-2">
+              {displayName}
+            </h3>
+            {displayDesc ? (
+              <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                {displayDesc}
+              </p>
+            ) : null}
           </div>
 
-          <div className="flex items-center gap-1">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className={`h-3 w-3 ${i < 4 ? "fill-amber-400 text-amber-400" : "text-muted-foreground"}`} />
-            ))}
-          </div>
-
-          <div className="mt-auto flex items-center justify-between">
-            <span className="text-lg font-bold text-primary">
+          <div className="mt-auto flex items-end justify-between gap-3 pt-1">
+            <p className="text-lg font-bold tabular-nums tracking-tight text-primary">
+              <span className="sr-only">{t("price_label")}</span>
               {formatCurrency(parseFloat(product.price), locale)}
-            </span>
-            <Button size="sm" onClick={handleAdd} className="gap-1.5">
-              <ShoppingCart className="h-4 w-4" />
+            </p>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleAdd}
+              className="shrink-0 gap-1.5 rounded-xl px-4 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="h-4 w-4" aria-hidden />
               {t("add_to_cart")}
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+        </div>
+      </div>
+    </motion.article>
   );
 }

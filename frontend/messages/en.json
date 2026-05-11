@@ -23,7 +23,8 @@
     "all_categories": "All",
     "no_results": "No items found.",
     "add_to_cart": "Add to Cart",
-    "added": "Added!"
+    "added": "Added!",
+    "price_label": "Price"
   },
   "cart": {
     "title": "Your Cart",
@@ -121,7 +122,12 @@
     "save_product": "Create product",
     "product_list": "All products",
     "no_categories": "No categories yet. Create one first.",
-    "creating": "Saving…"
+    "creating": "Saving…",
+    "storefront": "Back to store",
+    "shell_nav": "Admin sections",
+    "chart_orders_by_status": "Orders by status",
+    "chart_revenue_by_day": "Revenue by day (last 14 days with activity)",
+    "chart_empty": "Charts appear once you have orders."
   },
   "common": {
     "loading": "Loading...",

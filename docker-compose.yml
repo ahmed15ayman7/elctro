@@ -21,6 +21,24 @@ services:
     networks:
       - elctro_network
 
+  # ─── Redis (Socket.io adapter — pub/sub across instances) ───────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 5s
+    networks:
+      - elctro_network
+
   # ─── Backend (Express + Prisma) ──────────────────────────────────────────────
   backend:
     build:
@@ -30,6 +48,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-elctro_user}:${POSTGRES_PASSWORD:-elctro_pass}@postgres:5432/${POSTGRES_DB:-elctro_db}
       JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-change-me-access-secret-in-production}
@@ -38,6 +58,7 @@ services:
       REFRESH_TOKEN_TTL: ${REFRESH_TOKEN_TTL:-7d}
       PORT: 4000
       FRONTEND_ORIGIN: ${FRONTEND_ORIGIN:-http://localhost:3000}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     ports:
       - "4000:4000"
     networks:
@@ -52,6 +73,7 @@ services:
       args:
         NEXT_PUBLIC_API_URL: http://backend:4000
         NEXT_PUBLIC_SITE_URL: ${FRONTEND_ORIGIN:-http://localhost:3000}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:4000}
     restart: unless-stopped
     depends_on:
       - backend
@@ -67,6 +89,7 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
 
 networks:
   elctro_network:
