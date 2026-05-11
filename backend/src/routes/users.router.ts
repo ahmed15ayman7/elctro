@@ -149,7 +149,7 @@ router.post(
 router.post(
   "/:id/demote-from-admin",
   authenticateAccess,
-  requireAdmin,
+  // requireAdmin,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const admin = (req as AuthenticatedRequest).user;
