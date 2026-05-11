@@ -1,5 +1,10 @@
-# ─── Stage 1: Install all dependencies ───────────────────────────────────────
-FROM node:20-alpine AS deps
+# ─── Stage 1: Install dependencies ───────────────────────────────────────────
+FROM node:20-bookworm-slim AS base
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends openssl ca-certificates tini \
+  && rm -rf /var/lib/apt/lists/*
+
+FROM base AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json* ./
