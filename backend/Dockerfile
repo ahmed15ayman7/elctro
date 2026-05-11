@@ -15,6 +15,7 @@ COPY prisma ./prisma
 COPY src ./src
 
 RUN npm run db:generate
+RUN npm run db:migrate
 RUN npm run build
 
 # ─── Stage 3: Production runtime ──────────────────────────────────────────────
