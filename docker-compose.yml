@@ -27,9 +27,6 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
     environment:
       # DATABASE_URL: postgresql://${POSTGRES_USER:-elctro_user}:${POSTGRES_PASSWORD:-elctro_pass}@postgres:5435/${POSTGRES_DB:-elctro_db}
       DATABASE_URL: ${DATABASE_URL}
