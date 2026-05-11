@@ -13,6 +13,7 @@ import { io, type Socket } from "socket.io-client";
 import { useAuthStore } from "@/store/auth.store";
 import type { Order } from "@/actions/orders.actions";
 import { getSocketUrl, SOCKET_IO_PATH, registerBrowserSocket } from "@/lib/socket";
+import { apiRequest } from "@/lib/api";
 
 export type OrderUpdatedPayload = { order: Order };
 
@@ -50,16 +51,12 @@ export function SocketProvider({ children }: { children: ReactNode }) {
 
     (async () => {
       try {
-        const res = await fetch("/api/socket-handoff", { credentials: "same-origin" });
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as { token?: string };
-        if (!data.token || cancelled) return;
+        const res = await apiRequest<{ token?: string }>(  "/api/socket-handoff", { attachAuth: false });
+        if (!res || cancelled) return;
+        if (!res?.token || cancelled) return;
 
         const socket = io(socketUrl, {
-          path: SOCKET_IO_PATH,
-          auth: { token: data.token },
-          transports: ["websocket", "polling"],
-          autoConnect: true,
+          path: SOCKET_IO_PATH, auth: { token: res.token }, transports: ["websocket", "polling"], autoConnect: true,
         });
 
         socket.on("connect", () => {
