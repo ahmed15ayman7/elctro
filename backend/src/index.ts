@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middleware/errorHandler.js";
+import { setupSwagger } from "./docs/swagger.js";
 import authRouter from "./routes/auth.router.js";
 import productsRouter from "./routes/products.router.js";
 import categoriesRouter from "./routes/categories.router.js";
@@ -31,6 +32,9 @@ app.use(cookieParser());
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
+
+// ─── API documentation (OpenAPI + Swagger UI) ─────────────────────────────────
+setupSwagger(app);
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use("/api/auth", authRouter);

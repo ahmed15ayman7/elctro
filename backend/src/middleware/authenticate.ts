@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import { verifyAccessToken } from "../lib/jwt.js";
-import { UnauthorizedError } from "../lib/errors.js";
+import { ForbiddenError, UnauthorizedError } from "../lib/errors.js";
 
 export interface AuthenticatedRequest extends Request {
   user: {
@@ -42,7 +42,7 @@ export function requireAdmin(
 ): void {
   const user = (req as AuthenticatedRequest).user;
   if (!user || user.role !== "ADMIN") {
-    next(new UnauthorizedError("Admin access required"));
+    next(new ForbiddenError("Admin access required"));
     return;
   }
   next();
