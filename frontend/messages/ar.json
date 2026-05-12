@@ -10,7 +10,9 @@
     "logout": "تسجيل الخروج",
     "register": "إنشاء حساب",
     "about_us": "من نحن",
-    "signed_in_as": "مسجل الدخول كـ {name}"
+    "signed_in_as": "مسجل الدخول كـ {name}",
+    "open_navigation": "فتح القائمة",
+    "navigation_title": "التنقل"
   },
   "seo": {
     "site_name": "إلكترو",
@@ -321,6 +323,7 @@
     "creating": "جاري الحفظ…",
     "storefront": "العودة للمتجر",
     "shell_nav": "أقسام الإدارة",
+    "open_navigation": "فتح قائمة الإدارة",
     "chart_orders_by_status": "الطلبات حسب الحالة",
     "chart_orders_by_status_desc": "نسبة الطلبات في كل مرحلة تنفيذ.",
     "chart_section_analytics": "التحليلات والاتجاهات",

@@ -10,7 +10,9 @@
     "logout": "Logout",
     "register": "Register",
     "about_us": "About",
-    "signed_in_as": "Signed in as {name}"
+    "signed_in_as": "Signed in as {name}",
+    "open_navigation": "Open navigation",
+    "navigation_title": "Navigation"
   },
   "seo": {
     "site_name": "Elctro",
@@ -321,6 +323,7 @@
     "creating": "Saving…",
     "storefront": "Back to store",
     "shell_nav": "Admin sections",
+    "open_navigation": "Open admin menu",
     "chart_orders_by_status": "Orders by status",
     "chart_orders_by_status_desc": "Share of orders in each fulfillment state.",
     "chart_section_analytics": "Analytics & trends",

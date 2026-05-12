@@ -13,13 +13,19 @@ export type AdminTab = "overview" | "categories" | "products" | "orders" | "user
 type AdminLayoutContextValue = {
   tab: AdminTab;
   setTab: (tab: AdminTab) => void;
+  mobileSidebarOpen: boolean;
+  setMobileSidebarOpen: (open: boolean) => void;
 };
 
 const AdminLayoutContext = createContext<AdminLayoutContextValue | null>(null);
 
 export function AdminLayoutProvider({ children }: { children: ReactNode }) {
   const [tab, setTab] = useState<AdminTab>("overview");
-  const value = useMemo(() => ({ tab, setTab }), [tab]);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const value = useMemo(
+    () => ({ tab, setTab, mobileSidebarOpen, setMobileSidebarOpen }),
+    [tab, mobileSidebarOpen]
+  );
   return (
     <AdminLayoutContext.Provider value={value}>
       {children}
