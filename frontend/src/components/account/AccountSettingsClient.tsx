@@ -72,7 +72,7 @@ export default function AccountSettingsClient() {
     startProfile(async () => {
       const res = await updateProfileAction(trimmed);
       if (res.success && res.data) {
-        patchUser({ name: res.data.name });
+        patchUser({ name: res.data.name, imageUrl: res.data.imageUrl ?? null });
         toast({ title: t("profile_saved") });
       } else {
         toast({ title: res.error ?? t("profile_error"), variant: "destructive" });

@@ -15,6 +15,7 @@ const userPublicSelect = {
   email: true,
   name: true,
   role: true,
+  imageUrl: true,
   createdAt: true,
 } as const;
 

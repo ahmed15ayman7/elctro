@@ -16,6 +16,7 @@ interface AuthUser {
   email: string;
   name: string;
   role: string;
+  imageUrl?: string | null;
 }
 
 interface AuthResponse {
@@ -130,6 +131,37 @@ export async function registerAction(
     return { success: true, data: { user: data.user } };
   } catch (err) {
     const message = err instanceof ApiError ? err.message : "Registration failed";
+    return { success: false, error: message };
+  }
+}
+
+// ─── Google sign-in ───────────────────────────────────────────────────────────
+
+const googleTokenSchema = z.string().min(1, "Invalid Google credential");
+
+export async function googleLoginAction(
+  idToken: string
+): Promise<ActionResult<AuthClientPayload>> {
+  const parsed = googleTokenSchema.safeParse(idToken);
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.errors[0].message };
+  }
+
+  try {
+    const { response, data } = await postAuthJson("/api/auth/google", {
+      idToken: parsed.data,
+    });
+    const refresh = parseRefreshTokenFromResponse(response);
+    if (!refresh) {
+      return {
+        success: false,
+        error: "Signed in but session could not be established",
+      };
+    }
+    await setTokenCookies(data.accessToken, refresh);
+    return { success: true, data: { user: data.user } };
+  } catch (err) {
+    const message = err instanceof ApiError ? err.message : "Google sign-in failed";
     return { success: false, error: message };
   }
 }

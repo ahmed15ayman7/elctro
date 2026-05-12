@@ -5,6 +5,7 @@ import {
   loginUser,
   refreshTokens,
   logoutUser,
+  googleSignIn,
 } from "../services/auth.service.js";
 import {
   setRefreshCookie,
@@ -25,6 +26,10 @@ const registerSchema = z.object({
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(1),
+});
+
+const googleSchema = z.object({
+  idToken: z.string().min(1, "idToken is required"),
 });
 
 // ─── POST /api/auth/register ──────────────────────────────────────────────────
@@ -54,6 +59,25 @@ router.post(
     try {
       const input = loginSchema.parse(req.body);
       const result = await loginUser(input);
+      setRefreshCookie(res, result.refreshToken);
+      res.json({
+        user: result.user,
+        accessToken: result.accessToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── POST /api/auth/google ────────────────────────────────────────────────────
+
+router.post(
+  "/google",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { idToken } = googleSchema.parse(req.body);
+      const result = await googleSignIn(idToken);
       setRefreshCookie(res, result.refreshToken);
       res.json({
         user: result.user,

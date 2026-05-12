@@ -9,6 +9,7 @@ import { useCartStore } from "@/store/cart.store";
 import { useAuthStore } from "@/store/auth.store";
 import { logoutAction } from "@/actions/auth.actions";
 import { toast } from "@/hooks/use-toast";
+import UserAvatar from "@/components/common/UserAvatar";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -116,6 +117,9 @@ export default function Navbar() {
           {/* Auth */}
           {user ? (
             <div className="flex items-center gap-1">
+              <span className="flex" aria-label={t("signed_in_as", { name: user.name })}>
+                <UserAvatar name={user.name} imageUrl={user.imageUrl} size="sm" />
+              </span>
               <Link href="/account/settings">
                 <Button variant="ghost" size="icon" aria-label={t("account_settings")}>
                   <Settings className="h-5 w-5" />

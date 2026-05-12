@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search, Shield, User } from "lucide-react";
+import { Search, Shield } from "lucide-react";
 import { useTranslations, useLocale } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,6 +19,7 @@ import type { AdminUser } from "@/actions/users.actions";
 import { updateUserRoleAction } from "@/actions/users.actions";
 import { useAuthStore } from "@/store/auth.store";
 import { toast } from "@/hooks/use-toast";
+import UserAvatar from "@/components/common/UserAvatar";
 
 type Props = {
   users: AdminUser[];
@@ -96,11 +97,17 @@ export default function AdminUsersPanel({ users, onUserUpdated }: Props) {
                   className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6"
                 >
                   <div className="flex min-w-0 gap-3">
-                    <div
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"
-                      aria-hidden
-                    >
-                      {isAdmin ? <Shield className="h-5 w-5 text-primary" /> : <User className="h-5 w-5" />}
+                    <div className="relative shrink-0">
+                      <UserAvatar name={u.name} imageUrl={u.imageUrl} size="sm" />
+                      {isAdmin ? (
+                        <span
+                          className="absolute -bottom-0.5 -end-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-background bg-primary text-primary-foreground shadow-sm"
+                          title={t("users_role_admin")}
+                          aria-hidden
+                        >
+                          <Shield className="h-2.5 w-2.5" />
+                        </span>
+                      ) : null}
                     </div>
                     <div className="min-w-0">
                       <p className="truncate font-semibold text-foreground">{u.name}</p>

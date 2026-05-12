@@ -8,6 +8,8 @@ export interface AuthUser {
   email: string;
   name: string;
   role: string;
+  /** Profile photo URL; null if none (show initials / default avatar). */
+  imageUrl?: string | null;
 }
 
 interface AuthState {

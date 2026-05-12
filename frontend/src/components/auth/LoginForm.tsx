@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { loginAction } from "@/actions/auth.actions";
 import { useAuthStore } from "@/store/auth.store";
 import { toast } from "@/hooks/use-toast";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 export default function LoginForm() {
   const t = useTranslations("auth");
@@ -45,8 +46,17 @@ export default function LoginForm() {
           <CardTitle>{t("login_title")}</CardTitle>
           <CardDescription>{t("login_subtitle")}</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col gap-4">
+          <GoogleSignInButton />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-card px-2 text-muted-foreground">{t("google_or")}</span>
+            </div>
+          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="email">{t("email")}</Label>
               <Input id="email" name="email" type="email" required autoComplete="email" />
@@ -58,8 +68,8 @@ export default function LoginForm() {
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending ? t("loading") : t("submit_login")}
             </Button>
-          </CardContent>
-        </form>
+          </form>
+        </CardContent>
         <CardFooter className="justify-center text-sm text-muted-foreground">
           {t("no_account")}&nbsp;
           <Link href="/auth/register" className="text-primary hover:underline">

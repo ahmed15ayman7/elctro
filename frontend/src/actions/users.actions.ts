@@ -7,6 +7,7 @@ export interface AdminUser {
   email: string;
   name: string;
   role: string;
+  imageUrl?: string | null;
   createdAt: string;
   _count?: { orders: number };
 }
@@ -34,6 +35,7 @@ export interface CurrentUser {
   email: string;
   name: string;
   role: string;
+  imageUrl?: string | null;
   createdAt: string;
 }
 

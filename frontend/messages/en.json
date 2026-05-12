@@ -9,7 +9,8 @@
     "login": "Login",
     "logout": "Logout",
     "register": "Register",
-    "about_us": "About"
+    "about_us": "About",
+    "signed_in_as": "Signed in as {name}"
   },
   "seo": {
     "site_name": "Elctro",
@@ -191,7 +192,10 @@
     "no_account": "Don't have an account?",
     "have_account": "Already have an account?",
     "sign_up": "Sign up",
-    "sign_in": "Sign in"
+    "sign_in": "Sign in",
+    "google_or": "or continue with email",
+    "google_error": "Google sign-in failed",
+    "google_welcome": "Signed in"
   },
   "account": {
     "meta_title": "Account settings — Elctro",
