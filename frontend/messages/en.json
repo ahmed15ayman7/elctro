@@ -11,6 +11,27 @@
     "register": "Register",
     "about_us": "About"
   },
+  "seo": {
+    "site_name": "Elctro",
+    "default_title": "Elctro — Order food online with live delivery updates",
+    "default_description": "Browse the menu, checkout securely, and track your order from kitchen to door.",
+    "title_template": "%s | Elctro",
+    "home_title": "Fresh meals delivered fast",
+    "home_description": "Order from our menu of quality dishes with clear pricing, secure checkout, and live order tracking.",
+    "menu_title": "Menu — dishes, categories & prices",
+    "menu_description": "Explore categories, compare dishes, and add items to your cart.",
+    "cart_title": "Your cart",
+    "cart_description": "Review items and quantities before checkout.",
+    "checkout_title": "Checkout",
+    "checkout_description": "Enter delivery details and confirm your order.",
+    "orders_title": "My orders",
+    "orders_description": "Track order status, totals, and line items.",
+    "login_title_meta": "Sign in",
+    "login_description": "Access your account to place orders and track deliveries.",
+    "register_title_meta": "Create account",
+    "register_description": "Join to save addresses and get order updates.",
+    "jsonld_description": "Online food ordering with live order updates from checkout to delivery."
+  },
   "home": {
     "hero_badge": "Fresh food, delivered",
     "hero_title": "Delicious Food",
@@ -174,6 +195,7 @@
   },
   "account": {
     "meta_title": "Account settings — Elctro",
+    "meta_description": "Update your display name and manage browser push notifications for orders.",
     "title": "Account settings",
     "subtitle": "Update your profile and manage order notifications on this device.",
     "login_required": "Please sign in to manage your account.",
@@ -366,12 +388,14 @@
   },
   "privacy": {
     "meta_title": "Privacy Policy — Elctro",
+    "meta_description": "How Elctro collects, uses, and stores your data — cookies, orders, and your rights in plain language.",
     "title": "Privacy policy",
     "updated": "Last updated: 2026. This summary is provided for transparency; adapt with your legal counsel for production.",
     "body": "We collect information you provide when you create an account, place an order, or contact us—such as your name, email, delivery address, and payment preferences where applicable.\n\nWe use this information to operate the service: authenticate you, process orders, send transactional updates, and improve reliability and security.\n\nWe store session tokens in secure cookies where needed for authentication. We do not sell your personal data to third parties for marketing.\n\nYou may request access or deletion of your account data where applicable by contacting support. We may update this policy from time to time; the “last updated” date will change accordingly."
   },
   "terms": {
     "meta_title": "Terms & Conditions — Elctro",
+    "meta_description": "Rules for using Elctro: orders, pricing, acceptable use, and service limitations.",
     "title": "Terms & conditions",
     "updated": "Last updated: 2026. Replace with counsel-approved terms before launch.",
     "body": "By using Elctro you agree to follow these terms and any policies referenced here.\n\nYou must provide accurate delivery information. Prices and availability are shown at checkout and may change as the menu is updated.\n\nOrders are binding once confirmed. Cancellations or refunds follow the rules shown at checkout and any applicable consumer law.\n\nYou agree not to misuse the platform (including attempting to disrupt service, scrape data without permission, or access accounts that are not yours).\n\nWe provide the service “as is” to the extent permitted by law and may modify features or these terms with reasonable notice where required."

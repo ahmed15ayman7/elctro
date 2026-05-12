@@ -3,13 +3,29 @@ import { getTranslations } from "next-intl/server";
 import Navbar from "@/components/layout/Navbar";
 import SiteFooter from "@/components/layout/SiteFooter";
 import LegalArticle from "@/components/legal/LegalArticle";
+import { buildPageSeo } from "@/lib/seo";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("terms");
-  return { title: t("meta_title") };
+type Props = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "terms" });
+  const tSeo = await getTranslations({ locale, namespace: "seo" });
+  const title = t("meta_title");
+  const description = t("meta_description");
+  return {
+    ...buildPageSeo({
+      locale,
+      pathname: "/terms",
+      title,
+      description,
+      siteName: tSeo("site_name"),
+    }),
+  };
 }
 
-export default async function TermsPage() {
+export default async function TermsPage({ params }: Props) {
+  await params;
   const t = await getTranslations("terms");
 
   return (

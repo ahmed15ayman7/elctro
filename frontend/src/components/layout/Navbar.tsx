@@ -26,7 +26,7 @@ export default function Navbar() {
     await logoutAction();
     clearAuth();
     toast({ title: t("logout"), description: "See you soon!" });
-    router.push("/");
+    window.location.assign(`/${locale}/`);
   }
 
   return (

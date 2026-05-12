@@ -1,19 +1,73 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import Providers from "@/components/providers";
+import { absoluteUrl, alternatesForRoute, getSiteUrl } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Elctro — Online Food Ordering",
-  description: "Order delicious food delivered fast to your door.",
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafafa" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  if (!routing.locales.includes(locale as "en" | "ar")) {
+    notFound();
+  }
+
+  const t = await getTranslations({ locale, namespace: "seo" });
+  const siteUrl = getSiteUrl();
+  const title = t("default_title");
+  const description = t("default_description");
+  const siteName = t("site_name");
+  const ogLocale = locale === "ar" ? "ar_SA" : "en_US";
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      default: title,
+      template: t("title_template"),
+    },
+    description,
+    applicationName: siteName,
+    alternates: alternatesForRoute(locale, ""),
+    openGraph: {
+      type: "website",
+      locale: ogLocale,
+      url: absoluteUrl(locale, ""),
+      siteName,
+      title,
+      description,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+      },
+    },
+    formatDetection: {
+      telephone: false,
+    },
+  };
+}
 
 export default async function LocaleLayout({ children, params }: Props) {
   const { locale } = await params;

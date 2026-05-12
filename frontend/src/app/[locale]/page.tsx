@@ -1,5 +1,7 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import dynamic from "next/dynamic";
+import { buildPageSeo, getSiteUrl } from "@/lib/seo";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Truck, UtensilsCrossed, Zap, Shield, Clock } from "lucide-react";
@@ -13,10 +15,43 @@ const HeroScene = dynamic(() => import("@/components/three/HeroScene"));
 
 type Props = { params: Promise<{ locale: string }> };
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return {
+    ...buildPageSeo({
+      locale,
+      pathname: "",
+      title: t("home_title"),
+      description: t("home_description"),
+      siteName: t("site_name"),
+    }),
+  };
+}
+
 export default async function HomePage({ params }: Props) {
   const { locale } = await params;
   const t = await getTranslations("home");
   const tNav = await getTranslations("nav");
+  const tSeo = await getTranslations({ locale, namespace: "seo" });
+  const siteUrl = getSiteUrl();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        name: tSeo("site_name"),
+        url: siteUrl,
+        description: tSeo("jsonld_description"),
+      },
+      {
+        "@type": "WebSite",
+        name: tSeo("site_name"),
+        url: `${siteUrl}/${locale}`,
+        inLanguage: locale,
+      },
+    ],
+  };
 
   const [productsResult, categoriesResult] = await Promise.all([
     getProductsAction(),
@@ -31,6 +66,10 @@ export default async function HomePage({ params }: Props) {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       {/* Hero */}

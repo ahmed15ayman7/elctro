@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
-import { useRouter } from "@/i18n/navigation";
+import { useLayoutEffect, useEffect, useState, type ReactNode } from "react";
+import { useLocale } from "next-intl";
 import { useAuthStore } from "@/store/auth.store";
 import { AdminLayoutProvider } from "@/components/admin/AdminLayoutContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminHeader from "@/components/admin/AdminHeader";
 
 export default function ClientAdminLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
+  const locale = useLocale();
   const user = useAuthStore((s) => s.user);
   const [authReady, setAuthReady] = useState(false);
 
@@ -21,16 +21,16 @@ export default function ClientAdminLayout({ children }: { children: ReactNode })
     return unsub;
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!authReady) return;
     if (!user) {
-      router.replace("/auth/login");
+      window.location.assign(`/${locale}/auth/login`);
       return;
     }
     if (user.role !== "ADMIN") {
-      router.replace("/");
+      window.location.assign(`/${locale}/`);
     }
-  }, [authReady, user, router]);
+  }, [authReady, user, locale]);
 
   if (!authReady) {
     return (
@@ -42,8 +42,9 @@ export default function ClientAdminLayout({ children }: { children: ReactNode })
 
   if (!user || user.role !== "ADMIN") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-muted/30">
+      <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-muted/30 px-4 text-center text-sm text-muted-foreground">
         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p>Redirecting…</p>
       </div>
     );
   }

@@ -27,7 +27,14 @@ export const useAuthStore = create<AuthState>()(
         set((s) => ({
           user: s.user ? { ...s.user, ...partial } : null,
         })),
-      clearAuth: () => set({ user: null }),
+      clearAuth: () => {
+        set({ user: null });
+        try {
+          useAuthStore.persist.clearStorage();
+        } catch {
+          /* ignore (e.g. SSR) */
+        }
+      },
     }),
     {
       name: "elctro-auth-user",

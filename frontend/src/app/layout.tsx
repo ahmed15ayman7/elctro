@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+/** Root shell only; locale layout sets full metadata, `metadataBase`, and `lang`. */
 export const metadata: Metadata = {
-  title: "Elctro — Online Food Ordering",
-  description: "Order delicious food delivered fast to your door.",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
-// This root layout is intentionally minimal; the locale layout handles
-// locale-specific attributes (lang, dir, fonts).
 export default function RootLayout({
   children,
 }: {

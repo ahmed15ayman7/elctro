@@ -20,7 +20,7 @@ export default function AdminHeader() {
     await logoutAction();
     clearAuth();
     toast({ title: tNav("logout"), description: "See you soon!" });
-    router.push("/");
+    window.location.assign(`/${locale}/`);
   }
 
   return (
