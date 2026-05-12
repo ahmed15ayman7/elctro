@@ -137,69 +137,69 @@ router.patch(
 
 // ─── POST /api/users/:id/promote-to-admin (admin only) ─────────────────────────
 
-router.post(
-  "/:id/promote-to-admin",
-  authenticateAccess,
-  requireAdmin,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const existing = await prisma.user.findUnique({
-        where: { id: req.params.id },
-        select: userPublicSelect,
-      });
-      if (!existing) throw new NotFoundError("User not found");
+// router.post(
+//   "/:id/promote-to-admin",
+//   authenticateAccess,
+//   requireAdmin,
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//       const existing = await prisma.user.findUnique({
+//         where: { id: req.params.id },
+//         select: userPublicSelect,
+//       });
+//       if (!existing) throw new NotFoundError("User not found");
 
-      if (existing.role === "ADMIN") {
-        res.json(existing);
-        return;
-      }
+//       if (existing.role === "ADMIN") {
+//         res.json(existing);
+//         return;
+//       }
 
-      const user = await prisma.user.update({
-        where: { id: req.params.id },
-        data: { role: "ADMIN" },
-        select: userPublicSelect,
-      });
-      res.json(user);
-    } catch (err) {
-      next(err);
-    }
-  }
-);
+//       const user = await prisma.user.update({
+//         where: { id: req.params.id },
+//         data: { role: "ADMIN" },
+//         select: userPublicSelect,
+//       });
+//       res.json(user);
+//     } catch (err) {
+//       next(err);
+//     }
+//   }
+// );
 
 // ─── POST /api/users/:id/demote-from-admin (admin only) ────────────────────────
 
-router.post(
-  "/:id/demote-from-admin",
-  authenticateAccess,
-  requireAdmin,
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const admin = (req as AuthenticatedRequest).user;
-      // if (req.params.id === admin.id) {
-      //   throw new ConflictError("You cannot demote yourself");
-      // }
+// router.post(
+//   "/:id/demote-from-admin",
+//   authenticateAccess,
+//   requireAdmin,
+//   async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//       const admin = (req as AuthenticatedRequest).user;
+//       // if (req.params.id === admin.id) {
+//       //   throw new ConflictError("You cannot demote yourself");
+//       // }
 
-      const existing = await prisma.user.findUnique({
-        where: { id: req.params.id },
-        select: userPublicSelect,
-      });
-      if (!existing) throw new NotFoundError("User not found");
+//       const existing = await prisma.user.findUnique({
+//         where: { id: req.params.id },
+//         select: userPublicSelect,
+//       });
+//       if (!existing) throw new NotFoundError("User not found");
 
-      if (existing.role === "CUSTOMER") {
-        res.json(existing);
-        return;
-      }
+//       if (existing.role === "CUSTOMER") {
+//         res.json(existing);
+//         return;
+//       }
 
-      const user = await prisma.user.update({
-        where: { id: req.params.id },
-        data: { role: "CUSTOMER" },
-        select: userPublicSelect,
-      });
-      res.json(user);
-    } catch (err) {
-      next(err);
-    }
-  }
-);
+//       const user = await prisma.user.update({
+//         where: { id: req.params.id },
+//         data: { role: "CUSTOMER" },
+//         select: userPublicSelect,
+//       });
+//       res.json(user);
+//     } catch (err) {
+//       next(err);
+//     }
+//   }
+// );
 
 export default router;
