@@ -48,6 +48,11 @@ export default function RegisterForm() {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <GoogleSignInButton />
+          <p className="text-center text-xs text-muted-foreground">
+            <Link href="/auth/google/start" className="text-primary underline-offset-4 hover:underline">
+              {t("google_redirect")}
+            </Link>
+          </p>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />

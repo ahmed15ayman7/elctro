@@ -6,6 +6,7 @@ import {
   refreshTokens,
   logoutUser,
   googleSignIn,
+  googleSignInWithAuthCode,
 } from "../services/auth.service.js";
 import {
   setRefreshCookie,
@@ -30,6 +31,11 @@ const loginSchema = z.object({
 
 const googleSchema = z.object({
   idToken: z.string().min(1, "idToken is required"),
+});
+
+const googleCodeSchema = z.object({
+  code: z.string().min(1, "code is required"),
+  redirectUri: z.string().url("redirectUri must be a valid URL"),
 });
 
 // ─── POST /api/auth/register ──────────────────────────────────────────────────
@@ -78,6 +84,25 @@ router.post(
     try {
       const { idToken } = googleSchema.parse(req.body);
       const result = await googleSignIn(idToken);
+      setRefreshCookie(res, result.refreshToken);
+      res.json({
+        user: result.user,
+        accessToken: result.accessToken,
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// ─── POST /api/auth/google/code (OAuth redirect flow) ─────────────────────────
+
+router.post(
+  "/google/code",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { code, redirectUri } = googleCodeSchema.parse(req.body);
+      const result = await googleSignInWithAuthCode(code, redirectUri);
       setRefreshCookie(res, result.refreshToken);
       res.json({
         user: result.user,

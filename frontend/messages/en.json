@@ -195,7 +195,10 @@
     "sign_in": "Sign in",
     "google_or": "or continue with email",
     "google_error": "Google sign-in failed",
-    "google_welcome": "Signed in"
+    "google_welcome": "Signed in",
+    "google_redirect": "Sign in with Google (browser redirect)",
+    "oauth_finishing": "Finishing sign-in…",
+    "oauth_sync_failed": "Could not sync your session. Please try signing in again."
   },
   "account": {
     "meta_title": "Account settings — Elctro",

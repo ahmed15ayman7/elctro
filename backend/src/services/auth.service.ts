@@ -265,6 +265,60 @@ export async function googleSignIn(
   return { user: toSafeUser(user), ...tokens };
 }
 
+function assertValidGoogleRedirectUri(redirectUri: string): void {
+  const raw = process.env.FRONTEND_ORIGIN?.trim();
+  if (!raw) {
+    throw new UnauthorizedError("FRONTEND_ORIGIN is not set on the server");
+  }
+  const normalized = raw.endsWith("/") ? raw.slice(0, -1) : raw;
+  const allowedOrigin = new URL(normalized).origin;
+
+  let u: URL;
+  try {
+    u = new URL(redirectUri);
+  } catch {
+    throw new UnauthorizedError("Invalid redirect URI");
+  }
+
+  if (u.origin !== allowedOrigin) {
+    throw new UnauthorizedError("Redirect URI origin mismatch");
+  }
+
+  if (!/^\/(en|ar)\/auth\/callback\/google\/?$/.test(u.pathname)) {
+    throw new UnauthorizedError("Redirect URI path not allowed");
+  }
+}
+
+/** Exchange Google OAuth authorization `code` (redirect flow) then issue app tokens. */
+export async function googleSignInWithAuthCode(
+  code: string,
+  redirectUri: string
+): Promise<{ user: SafeUser } & TokenPair> {
+  assertValidGoogleRedirectUri(redirectUri);
+
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new UnauthorizedError("Google OAuth is not fully configured");
+  }
+
+  const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
+
+  try {
+    const authResponse = await oauth2Client.getToken(code);
+    const idToken = authResponse.tokens.id_token;
+    if (!idToken) {
+      throw new UnauthorizedError("Google did not return an ID token");
+    }
+    return googleSignIn(idToken);
+  } catch (err) {
+    if (err instanceof UnauthorizedError || err instanceof ConflictError) {
+      throw err;
+    }
+    throw new UnauthorizedError("Could not exchange Google authorization code");
+  }
+}
+
 // ─── Logout ───────────────────────────────────────────────────────────────────
 
 export async function logoutUser(rawRefreshToken: string): Promise<void> {
