@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/auth.store";
 import { logoutAction } from "@/actions/auth.actions";
 import { toast } from "@/hooks/use-toast";
 import UserAvatar from "@/components/common/UserAvatar";
+import { ElctroLogoLockup } from "@/components/brand/ElctroLogo";
 
 export default function Navbar() {
   const t = useTranslations("nav");
@@ -39,11 +40,11 @@ export default function Navbar() {
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
-            <span className="text-sm font-bold text-white">E</span>
-          </div>
-          <span className="text-xl font-bold">Elctro</span>
+        <Link
+          href="/"
+          className="flex items-center gap-2 rounded-md outline-none ring-offset-background transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        >
+          <ElctroLogoLockup />
         </Link>
 
         {/* Nav links — scroll on small screens */}
