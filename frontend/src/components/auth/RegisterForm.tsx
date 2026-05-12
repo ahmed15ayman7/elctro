@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { registerAction } from "@/actions/auth.actions";
 import { useAuthStore } from "@/store/auth.store";
 import { toast } from "@/hooks/use-toast";
-import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
+import GoogleRedirectLink from "@/components/auth/GoogleRedirectLink";
 
 export default function RegisterForm() {
   const t = useTranslations("auth");
@@ -47,12 +47,7 @@ export default function RegisterForm() {
           <CardDescription>{t("register_subtitle")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <GoogleSignInButton />
-          <p className="text-center text-xs text-muted-foreground">
-            <Link href="/auth/google/start" className="text-primary underline-offset-4 hover:underline">
-              {t("google_redirect")}
-            </Link>
-          </p>
+          <GoogleRedirectLink />
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />

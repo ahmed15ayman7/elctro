@@ -66,5 +66,5 @@ export async function GET(
 
   await setTokenCookies(accessToken, refresh);
 
-  return NextResponse.redirect(new URL(`/${locale}/auth/oauth-done`, request.url));
+  return NextResponse.redirect(new URL(`${siteUrl}/${locale}/auth/oauth-done`, request.url));
 }

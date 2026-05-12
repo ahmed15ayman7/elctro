@@ -196,7 +196,8 @@
     "google_or": "or continue with email",
     "google_error": "Google sign-in failed",
     "google_welcome": "Signed in",
-    "google_redirect": "Sign in with Google (browser redirect)",
+    "google_redirect": "Continue with Google",
+    "google_redirect_hint": "Secure redirect — Google opens in your browser",
     "oauth_finishing": "Finishing sign-in…",
     "oauth_sync_failed": "Could not sync your session. Please try signing in again."
   },
