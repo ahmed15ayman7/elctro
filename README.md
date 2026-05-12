@@ -117,4 +117,5 @@ Please ensure your code follows the existing TypeScript patterns and includes ne
 Distributed under the Apache 2.0 License. See `LICENSE` for more information.
 
 ---
-*Built with ❤️ by [Ahmed Ayman](ahmed15ayman7ahmed2002@gmail.com)*
+*Built with ❤️ by [Ahmed Ayman](mailto:ahmed15ayman7ahmed2002@gmail.com)*
+*Contact: [+201097395668](tel:+201097395668) ([WhatsApp](https://wa.me/201097395668)) / [+201284959694](tel:+201284959694) ([WhatsApp](https://wa.me/201284959694))*
